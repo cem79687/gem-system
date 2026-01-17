@@ -32,7 +32,7 @@
         #hud-window { width: 90%; max-width: 440px; background: var(--panel-bg); border: 1px solid rgba(0, 229, 255, 0.1); border-radius: 28px; padding: 30px; position: relative; box-sizing: border-box; }
         .logout-btn { position: absolute; top: 20px; right: 20px; background: none; border: 1px solid var(--system-red); color: var(--system-red); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
         
-        #recovery-widget { position: absolute; top: 60px; right: 20px; width: 90px; text-align: center; border: 2px solid var(--recovery-gold); border-radius: 12px; padding: 10px 5px; background: rgba(255, 204, 0, 0.1); cursor: pointer; transition: 0.3s; z-index: 10; }
+        #recovery-widget { position: absolute; top: 60px; right: 20px; width: 90px; text-align: center; border: 2px solid var(--recovery-gold); border-radius: 12px; padding: 10px 5px; background: rgba(255, 204, 0, 0.1); cursor: pointer; z-index: 10; }
 
         .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
         .bio-card { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
@@ -43,51 +43,31 @@
         .quest-item.active { border-left-color: var(--solo-cyan); color: #fff; background: rgba(0, 229, 255, 0.05); }
         
         .btn-modern { width: 100%; padding: 16px; background: var(--solo-blue); border: none; border-radius: 12px; color: #fff; font-weight: 900; letter-spacing: 3px; cursor: pointer; }
-        .btn-modern:disabled { background: #1a1d26; color: #444; }
 
-        /* --- BOUTON SYSTEM LATÉRAL (CORRIGÉ) --- */
-        .side-btn-system { 
-            position: fixed; 
-            right: 0; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            width: 50px; 
-            height: 90px; 
-            background: #000; 
-            border: 1px solid var(--system-red); 
-            border-right: none; 
-            border-radius: 15px 0 0 15px; 
-            color: var(--system-red); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            z-index: 99999; 
-            box-shadow: -5px 0 15px rgba(255, 61, 61, 0.3);
+        /* --- BOUTON SYSTEM BUSITÉ --- */
+        .side-btn-system {
+            position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+            width: 55px; height: 120px; cursor: pointer; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(10, 12, 18, 0.95);
+            clip-path: polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%);
+            border-left: 2px solid var(--system-red); transition: all 0.3s ease;
         }
+        .side-btn-system::before { content: ""; position: absolute; top: 0; right: 0; width: 100%; height: 4px; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); }
+        .side-btn-system::after { content: ""; position: absolute; bottom: 0; right: 0; width: 100%; height: 4px; background: var(--system-red); box-shadow: 0 0 15px var(--system-red); }
+        .side-btn-system span { writing-mode: vertical-rl; text-orientation: mixed; font-weight: 900; letter-spacing: 3px; font-size: 12px; color: #fff; text-transform: uppercase; margin-top: 10px; }
 
         /* --- SYSTEM INTERFACE --- */
         #system-modal { position: fixed; inset: 0; background: #05070a; z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 10px; }
         .os-window { width: 100%; max-width: 1000px; height: 90vh; background: #0a0c12; border: 1px solid #1a1d26; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
         .os-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1d26; }
         .os-body { display: flex; flex: 1; padding: 20px; overflow-y: auto; }
-        
         .tab-btn { background: #1a1d26; color: #555; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-family: 'Rajdhani'; font-weight: 700; margin-right: 5px; font-size: 12px; }
         .tab-btn.active { background: var(--solo-blue); color: #fff; }
-
         .profile-side { width: 180px; border-right: 1px solid #1a1d26; padding-right: 15px; display: flex; flex-direction: column; align-items: center; }
         .avatar-circle-lg { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--solo-cyan); overflow: hidden; margin-bottom: 15px; }
-        
-        .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .inv-slot { height: 60px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555; }
-        
-        .full-body-container { flex: 1; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 15px; border: 1px dashed #333; overflow: hidden; position: relative; min-height: 200px; }
 
-        @media (max-width: 600px) {
-            .os-body { flex-direction: column; }
-            .profile-side { width: 100%; border-right: none; border-bottom: 1px solid #1a1d26; padding-right: 0; padding-bottom: 15px; margin-bottom: 15px; }
-        }
+        @media (max-width: 600px) { .os-body { flex-direction: column; } .profile-side { width: 100%; border-right: none; border-bottom: 1px solid #1a1d26; padding-bottom: 15px; margin-bottom: 15px; } }
     </style>
 </head>
 <body>
@@ -104,12 +84,10 @@
     <div id="main-dashboard" class="hidden">
         <div id="hud-window">
             <button onclick="location.reload()" class="logout-btn">⏻</button>
-            
             <div id="recovery-widget" onclick="toggleRestTimer()">
                 <div style="font-size: 8px; color: var(--recovery-gold); font-weight: 900; letter-spacing: 1px;">RECOVERY</div>
                 <div id="rec-val" style="font-family: 'JetBrains Mono'; font-size: 16px; color:#fff; font-weight: 700;">00:30</div>
             </div>
-
             <div style="display: flex; gap: 20px; align-items: center;">
                 <div onclick="document.getElementById('avatar-file').click()" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--solo-cyan); overflow: hidden; cursor: pointer;">
                     <img id="img-hud" src="https://via.placeholder.com/80/05070a/3d5afe" style="width:100%; height:100%; object-fit:cover;">
@@ -120,31 +98,28 @@
                     <span id="hud-rank" style="border: 1px solid var(--system-red); color:var(--system-red); font-size:10px; padding: 2px 8px; border-radius:4px; font-weight: bold;">RANG E</span>
                 </div>
             </div>
-
             <div class="bio-grid">
                 <div class="bio-card"><span class="bio-label">ÂGE</span><input type="number" id="age" class="bio-input" value="33" onchange="saveData()"></div>
                 <div class="bio-card"><span class="bio-label">IMC</span><div id="imc" class="bio-input" style="color:var(--system-green);">--</div></div>
                 <div class="bio-card"><span class="bio-label">TAILLE (CM)</span><input type="number" id="height" class="bio-input" value="186" onchange="saveData()"></div>
                 <div class="bio-card"><span class="bio-label">POIDS (KG)</span><input type="number" id="weight" class="bio-input" value="80" onchange="saveData()"></div>
             </div>
-
             <div id="quest-container">
                 <div class="quest-item" id="q1"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
                 <div class="quest-item" id="q2"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
                 <div class="quest-item" id="q3"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
                 <div class="quest-item" id="q4"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
             </div>
-
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-                <div id="mission-timer" style="font-family:'JetBrains Mono'; font-size:18px; color:var(--system-red); font-weight:bold;">24:00:00</div>
+                <div id="mission-timer" style="font-family:'JetBrains Mono'; font-size:18px; color:var(--system-red); font-weight:bold;">01:00</div>
                 <button id="accept-btn" class="btn-modern" style="width:140px; padding:12px; font-size: 12px;" onclick="revealQuests()">ACCEPTER</button>
             </div>
         </div>
     </div>
 
     <div id="side-system-btn" class="side-btn-system hidden" onclick="toggleSystem()">
-        <div style="font-size: 20px;">⚠️</div>
-        <span style="font-size: 8px; font-weight: 900;">SYSTEM</span>
+        <div style="font-size: 18px; color: var(--system-red);">⚠️</div>
+        <span>SYSTEM</span>
     </div>
 
     <div id="system-modal" class="hidden">
@@ -155,9 +130,8 @@
                     <button id="btn-stats" class="tab-btn active" onclick="switchTab('stats')">STATS</button>
                     <button id="btn-inv" class="tab-btn" onclick="switchTab('inv')">INV</button>
                 </div>
-                <button onclick="toggleSystem()" style="background:none; border:1px solid #444; color:#888; padding:5px 10px; cursor:pointer; border-radius:4px; font-size: 10px;">RETOUR</button>
+                <button onclick="toggleSystem()" style="background:none; border:1px solid #444; color:#888; padding:5px 10px; border-radius:4px; font-size: 10px;">RETOUR</button>
             </div>
-            
             <div class="os-body">
                 <div class="profile-side">
                     <div class="avatar-circle-lg"><img id="img-sys" src="" style="width:100%; height:100%; object-fit:cover;"></div>
@@ -165,51 +139,36 @@
                     <div style="width:100%; height:8px; background:#111; border-radius:4px;"><div style="width:100%; height:100%; background:var(--hp-orange); border-radius:4px;"></div></div>
                     <span style="font-size:10px; color:var(--hp-orange); font-weight:bold; margin-top:5px;">VITALITÉ : 100%</span>
                 </div>
-
-                <div id="stats-content" style="flex:1; padding-left:15px; display:flex; flex-direction:column;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap: wrap;">
-                        <div style="height: 250px; width:100%; max-width: 350px;"><canvas id="radarChart"></canvas></div>
-                        <div style="text-align:right;"><div style="font-size: 10px; color:#444;">RANK</div><div class="rank-letter" style="font-size:50px; font-weight:900; color:var(--system-red); line-height:0.8;">E</div></div>
-                    </div>
+                <div id="stats-content" style="flex:1; padding-left:15px;">
+                    <div style="height: 250px; width:100%;"><canvas id="radarChart"></canvas></div>
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <div style="background:#0f121a; flex:1; padding:10px; border-bottom:3px solid var(--solo-cyan); font-size: 12px;">STR <span id="s-str" style="float:right; color:var(--solo-cyan);">--</span></div>
                         <div style="background:#0f121a; flex:1; padding:10px; border-bottom:3px solid var(--solo-cyan); font-size: 12px;">AGI <span id="s-agi" style="float:right; color:var(--solo-cyan);">--</span></div>
                         <div style="background:#0f121a; flex:1; padding:10px; border-bottom:3px solid var(--solo-cyan); font-size: 12px;">VIT <span id="s-vit" style="float:right; color:var(--solo-cyan);">--</span></div>
                     </div>
                 </div>
-
                 <div id="inv-content" class="hidden" style="flex:1; padding-left:15px; display: flex; flex-direction: column; gap: 20px;">
-                    <div class="full-body-container" onclick="document.getElementById('full-avatar-file').click()">
-                        <img id="img-full-body" src="" style="max-height: 100%; object-fit: contain; z-index: 1;">
-                        <input type="file" id="full-avatar-file" class="hidden" accept="image/*" onchange="previewFullBody(this)">
-                    </div>
-                    <div class="inv-grid">
-                        <div class="inv-slot">CASQUE</div><div class="inv-slot">ARMURE</div>
-                        <div class="inv-slot">GANTS</div><div class="inv-slot">BOTTES</div>
-                        <div class="inv-slot">ARME</div><div class="inv-slot">SPECIAL</div>
-                    </div>
+                    <div style="flex:1; background:rgba(0,0,0,0.3); border:1px dashed #333; border-radius:15px;"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let radar, restInterval;
+        let radar, restInterval, questInterval;
         const EXERCISES = [
-            { n: "POMPES", u: "REP", m: 50 }, { n: "ABDOS", u: "REP", m: 50 },
-            { n: "SQUATS", u: "REP", m: 50 }, { n: "TRACTIONS", u: "REP", m: 20 },
-            { n: "GAINAGE", u: "SEC", m: 60 }, { n: "COURSE", u: "KM", m: 5 }
+            { n: "POMPES", u: "REP", m: 30 }, { n: "ABDOS", u: "REP", m: 30 },
+            { n: "SQUATS", u: "REP", m: 30 }, { n: "GAINAGE", u: "SEC", m: 30 }
         ];
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSystemSound() {
+        function playSystemSound(freq = 880) {
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            oscillator.type = 'square'; oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
             oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
-            oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.5);
+            oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.3);
         }
 
         function secureLogin() {
@@ -222,19 +181,15 @@
         }
 
         function toggleRestTimer() {
-            let display = document.getElementById('rec-val');
-            let timeLeft = 30;
+            let display = document.getElementById('rec-val'), timeLeft = 30;
             clearInterval(restInterval);
             restInterval = setInterval(() => {
                 timeLeft--;
                 display.innerText = `00:${timeLeft.toString().padStart(2, '0')}`;
                 display.style.color = "#ff3d3d";
                 if (timeLeft <= 0) {
-                    clearInterval(restInterval);
-                    display.innerText = "00:30";
-                    display.style.color = "#fff";
-                    playSystemSound();
-                    alert("REPOS TERMINÉ !");
+                    clearInterval(restInterval); display.innerText = "00:30";
+                    display.style.color = "#fff"; playSystemSound(1200);
                 }
             }, 1000);
         }
@@ -242,18 +197,24 @@
         function revealQuests() {
             document.getElementById('accept-btn').disabled = true;
             document.getElementById('accept-btn').style.opacity = "0.5";
-            let totalSeconds = 24 * 3600;
-            setInterval(() => {
-                totalSeconds--;
-                let h = Math.floor(totalSeconds / 3600), m = Math.floor((totalSeconds % 3600) / 60), s = totalSeconds % 60;
-                document.getElementById('mission-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            let timeLeft = 60; // 1 minute
+            clearInterval(questInterval);
+            questInterval = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+                document.getElementById('mission-timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if(timeLeft <= 10) document.getElementById('mission-timer').style.color = "var(--system-red)";
+                if(timeLeft <= 0) {
+                    clearInterval(questInterval);
+                    playSystemSound(440);
+                    alert("MISSION ÉCHOUÉE : TEMPS ÉPUISÉ");
+                }
             }, 1000);
 
-            const shuffled = EXERCISES.sort(() => 0.5 - Math.random()).slice(0, 4);
             for(let i=1; i<=4; i++) {
-                const el = document.getElementById('q'+i), ex = shuffled[i-1], goal = Math.floor(ex.m * (0.7 + Math.random() * 0.3));
+                const el = document.getElementById('q'+i), ex = EXERCISES[i-1];
                 el.classList.add('active');
-                el.innerHTML = `<span>[ ${ex.n} ]</span><span>0 / ${goal} ${ex.u}</span>`;
+                el.innerHTML = `<span>[ ${ex.n} ]</span><span>0 / ${ex.m} ${ex.u}</span>`;
             }
         }
 
@@ -275,8 +236,7 @@
 
         function saveData() {
             const data = { age: document.getElementById('age').value, h: document.getElementById('height').value, w: document.getElementById('weight').value, img: document.getElementById('img-hud').src };
-            localStorage.setItem('gem_v18', JSON.stringify(data));
-            updateSystemStats();
+            localStorage.setItem('gem_v18', JSON.stringify(data)); updateSystemStats();
         }
 
         function loadData() {
@@ -285,20 +245,11 @@
                 document.getElementById('age').value = d.age; document.getElementById('height').value = d.h; document.getElementById('weight').value = d.w;
                 document.getElementById('img-hud').src = d.img; document.getElementById('img-sys').src = d.img;
             }
-            const fb = localStorage.getItem('gem_fb_v18');
-            if(fb) document.getElementById('img-full-body').src = fb;
             updateSystemStats();
         }
 
         function previewImage(i) {
-            if(!i.files[0]) return;
             const r = new FileReader(); r.onload = (e) => { document.getElementById('img-hud').src = e.target.result; document.getElementById('img-sys').src = e.target.result; saveData(); };
-            r.readAsDataURL(i.files[0]);
-        }
-
-        function previewFullBody(i) {
-            if(!i.files[0]) return;
-            const r = new FileReader(); r.onload = (e) => { document.getElementById('img-full-body').src = e.target.result; localStorage.setItem('gem_fb_v18', e.target.result); };
             r.readAsDataURL(i.files[0]);
         }
 
