@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gem System v18.2 - Final Version</title>
+    <title>Gem System v18.3 - Restored</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -11,7 +11,6 @@
             --solo-blue: #3d5afe; --solo-cyan: #00e5ff;
             --panel-bg: #0a0c12; --system-red: #ff3d3d;
             --system-green: #00ff88; --recovery-gold: #ffcc00;
-            --hp-orange: #ff6d00;
         }
 
         body, html {
@@ -23,58 +22,46 @@
 
         .hidden { display: none !important; }
 
-        /* --- AUTHENTIFICATION --- */
+        /* --- LOGIN WINDOW --- */
         #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: flex; align-items: center; justify-content: center; z-index: 50000; }
-        .login-card { background: var(--panel-bg); padding: 50px; border-radius: 20px; border: 1px solid var(--solo-cyan); text-align: center; width: 320px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2); }
-        .login-input { width: 100%; padding: 15px; background: #111; border: 1px solid #222; color: #fff; margin-bottom: 15px; text-align: center; border-radius: 8px; font-family: 'Rajdhani'; outline: none; border: 1px solid rgba(0, 229, 255, 0.1); }
+        .login-card { background: var(--panel-bg); padding: 50px; border-radius: 20px; border: 1px solid var(--solo-cyan); text-align: center; width: 320px; }
+        .login-input { width: 100%; padding: 15px; background: #111; border: 1px solid #222; color: #fff; margin-bottom: 15px; text-align: center; border-radius: 8px; font-family: 'Rajdhani'; outline: none; }
 
-        /* --- HUD PRINCIPAL --- */
+        /* --- HUD --- */
         #hud-window { width: 90%; max-width: 420px; background: var(--panel-bg); border: 1px solid rgba(0, 229, 255, 0.1); border-radius: 28px; padding: 25px; position: relative; box-sizing: border-box; }
-        .logout-btn { position: absolute; top: 20px; right: 20px; background: none; border: 1px solid var(--system-red); color: var(--system-red); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 100; }
         
-        #recovery-widget { position: absolute; top: 60px; right: 20px; width: 80px; text-align: center; border: 1px solid var(--recovery-gold); border-radius: 10px; padding: 5px; background: rgba(255, 204, 0, 0.05); cursor: pointer; z-index: 10; transition: 0.3s; }
+        #recovery-widget { position: absolute; top: 60px; right: 20px; width: 80px; text-align: center; border: 1px solid var(--recovery-gold); border-radius: 10px; padding: 5px; background: rgba(255, 204, 0, 0.05); cursor: pointer; }
 
-        /* ACTION TIMER (1 MINUTE) */
-        #action-timer-box { 
-            background: rgba(0, 229, 255, 0.05); border: 1px solid var(--solo-cyan); 
-            border-radius: 12px; padding: 10px; margin-bottom: 15px; text-align: center; display: none;
-        }
-
-        .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
         .bio-card { background: rgba(255,255,255,0.02); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
         .bio-label { font-size: 9px; color: var(--solo-blue); font-weight: 700; letter-spacing: 1px; display: block; }
         .bio-input { background: transparent; border: none; color: #fff; font-family: 'JetBrains Mono'; font-weight: 700; font-size: 15px; width: 100%; outline: none; }
         
-        .quest-item { padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; border-left: 3px solid #222; transition: 0.3s; }
+        .quest-item { padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; border-left: 3px solid #222; }
         .quest-item.active { border-left-color: var(--solo-cyan); color: #fff; background: rgba(0, 229, 255, 0.05); }
         
         .btn-modern { width: 100%; padding: 15px; background: var(--solo-blue); border: none; border-radius: 12px; color: #fff; font-weight: 900; letter-spacing: 2px; cursor: pointer; }
 
-        /* --- BOUTON SYSTEM BISEAUTÉ VERTICAL --- */
+        /* --- BOUTON SYSTEM BISEAUTÉ --- */
         .side-btn-system {
             position: fixed; right: 0; top: 50%; transform: translateY(-50%);
             width: 50px; height: 110px; cursor: pointer; z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background: rgba(10, 12, 18, 0.95);
             clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%);
-            border-left: 2px solid var(--system-red); transition: 0.3s;
+            border-left: 2px solid var(--system-red);
         }
         .side-btn-system::before { content: ""; position: absolute; top: 0; width: 100%; height: 3px; background: var(--solo-cyan); box-shadow: 0 0 10px var(--solo-cyan); }
         .side-btn-system::after { content: ""; position: absolute; bottom: 0; width: 100%; height: 3px; background: var(--system-red); box-shadow: 0 0 10px var(--system-red); }
         .side-btn-system span { writing-mode: vertical-rl; text-orientation: mixed; font-weight: 900; font-size: 11px; color: #fff; letter-spacing: 2px; margin-top: 5px; }
 
-        /* --- SYSTEM INTERFACE --- */
+        /* --- SYSTEM MODAL --- */
         #system-modal { position: fixed; inset: 0; background: #05070a; z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 10px; }
         .os-window { width: 100%; max-width: 900px; height: 85vh; background: #0a0c12; border: 1px solid #1a1d26; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; }
         .os-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1d26; }
         .os-body { display: flex; flex: 1; padding: 20px; overflow-y: auto; gap: 20px; }
         .tab-btn { background: #1a1d26; color: #555; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-family: 'Rajdhani'; font-weight: 700; }
         .tab-btn.active { background: var(--solo-blue); color: #fff; }
-        
-        .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
-        .inv-slot { height: 50px; background: rgba(255,255,255,0.02); border: 1px solid rgba(0, 229, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #444; }
-
-        @media (max-width: 600px) { .os-body { flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -89,16 +76,9 @@
 
     <div id="main-dashboard" class="hidden">
         <div id="hud-window">
-            <button onclick="location.reload()" class="logout-btn">⏻</button>
             <div id="recovery-widget" onclick="toggleRestTimer()">
                 <div style="font-size: 8px; color: var(--recovery-gold); font-weight: bold;">RECOVERY</div>
                 <div id="rec-val" style="font-family: 'JetBrains Mono'; font-size: 14px;">00:30</div>
-            </div>
-
-            <div id="action-timer-box">
-                <div style="font-size: 9px; color: var(--solo-cyan); letter-spacing: 2px; margin-bottom: 5px;">ACTION TIMER</div>
-                <div id="action-clock" style="font-size: 28px; font-weight: 900; font-family: 'JetBrains Mono';">01:00</div>
-                <button onclick="startActionTimer()" style="background:var(--solo-cyan); border:none; color:black; font-weight:900; font-size:10px; padding:5px 15px; border-radius:5px; margin-top:5px; cursor:pointer;">START</button>
             </div>
 
             <div style="display:flex; gap:15px; align-items:center;">
@@ -126,9 +106,9 @@
                 <div class="quest-item" id="q4"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
                 <div id="mission-timer" style="font-family:'JetBrains Mono'; font-size:18px; color:var(--system-red); font-weight:bold;">24:00:00</div>
-                <button id="accept-btn" class="btn-modern" style="width:130px; padding:12px; font-size:11px;" onclick="revealQuests()">ACCEPTER</button>
+                <button id="accept-btn" class="btn-modern" style="width:130px; padding:12px;" onclick="revealQuests()">ACCEPTER</button>
             </div>
         </div>
     </div>
@@ -143,33 +123,19 @@
             <div class="os-header">
                 <div style="display:flex; gap:5px;">
                     <button id="btn-stats" class="tab-btn active" onclick="switchTab('stats')">STATS</button>
-                    <button id="btn-inv" class="tab-btn" onclick="switchTab('inv')">INV</button>
                 </div>
                 <button onclick="toggleSystem()" style="background:none; border:1px solid #333; color:#666; padding:5px 10px; border-radius:5px; font-size:10px;">RETOUR</button>
             </div>
             <div class="os-body">
                 <div id="stats-content" style="flex:1; display:flex; flex-direction:column; align-items:center;">
                     <div style="width:100%; height:250px;"><canvas id="radarChart"></canvas></div>
-                    <div style="display:flex; gap:10px; width:100%; margin-top:15px;">
-                        <div style="background:#0f121a; flex:1; padding:10px; border-bottom:2px solid var(--solo-cyan); font-size:11px;">STR <span id="s-str" style="float:right;">--</span></div>
-                        <div style="background:#0f121a; flex:1; padding:10px; border-bottom:2px solid var(--solo-cyan); font-size:11px;">AGI <span id="s-agi" style="float:right;">--</span></div>
-                        <div style="background:#0f121a; flex:1; padding:10px; border-bottom:2px solid var(--solo-cyan); font-size:11px;">VIT <span id="s-vit" style="float:right;">--</span></div>
-                    </div>
-                </div>
-                <div id="inv-content" class="hidden" style="flex:1;">
-                    <div style="height:150px; background:rgba(0,0,0,0.5); border:1px dashed #333; margin-bottom:15px; border-radius:10px;"></div>
-                    <div class="inv-grid">
-                        <div class="inv-slot">ARME</div><div class="inv-slot">ARMURE</div>
-                        <div class="inv-slot">GANTS</div><div class="inv-slot">BOTTES</div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let radar, restInterval, actionInterval, dailyInterval;
-        const EXERCISES = ["POMPES x30", "ABDOS x50", "SQUATS x40", "PLANCHE 1 MIN"];
+        let radar, restInterval, dailyInterval;
 
         function secureLogin() {
             if(document.getElementById('hPWD').value === "1234") {
@@ -190,60 +156,36 @@
             }, 1000);
         }
 
-        function startActionTimer() {
-            let timeLeft = 60;
-            clearInterval(actionInterval);
-            document.getElementById('action-clock').style.color = "var(--solo-cyan)";
-            actionInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('action-clock').innerText = `00:${timeLeft.toString().padStart(2,'0')}`;
-                if(timeLeft <= 10) document.getElementById('action-clock').style.color = "var(--system-red)";
-                if(timeLeft <= 0) { clearInterval(actionInterval); alert("ACTION TERMINÉE !"); document.getElementById('action-clock').innerText = "01:00"; }
-            }, 1000);
-        }
-
         function revealQuests() {
             document.getElementById('accept-btn').style.display = "none";
-            document.getElementById('action-timer-box').style.display = "block";
             let totalSeconds = 24 * 3600;
             dailyInterval = setInterval(() => {
                 totalSeconds--;
                 let h = Math.floor(totalSeconds/3600), m = Math.floor((totalSeconds%3600)/60), s = totalSeconds%60;
                 document.getElementById('mission-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }, 1000);
+            const EX = ["POMPES x30", "ABDOS x50", "SQUATS x40", "PLANCHE 1 MIN"];
             for(let i=1; i<=4; i++) {
-                document.getElementById('q'+i).innerHTML = `<span>${EXERCISES[i-1]}</span><span style="color:var(--solo-cyan);">EN COURS</span>`;
+                document.getElementById('q'+i).innerHTML = `<span>${EX[i-1]}</span><span style="color:var(--solo-cyan);">EN COURS</span>`;
                 document.getElementById('q'+i).classList.add('active');
             }
-        }
-
-        function switchTab(t) {
-            document.getElementById('stats-content').className = (t==='stats'?'':'hidden');
-            document.getElementById('inv-content').className = (t==='inv'?'':'hidden');
-            document.getElementById('btn-stats').className = 'tab-btn'+(t==='stats'?' active':'');
-            document.getElementById('btn-inv').className = 'tab-btn'+(t==='inv'?' active':'');
         }
 
         function updateSystemStats() {
             const w = parseFloat(document.getElementById('weight').value)||0, h = parseFloat(document.getElementById('height').value)||0;
             const imc = h>0 ? (w/((h/100)**2)) : 0;
             document.getElementById('imc').innerText = imc.toFixed(1);
-            let s=Math.floor(w/5), v=Math.floor(w/4.5), a=imc>0?Math.floor(100/imc)*2:10;
-            document.getElementById('s-str').innerText=s; document.getElementById('s-agi').innerText=a; document.getElementById('s-vit').innerText=v;
-            if(radar) { radar.data.datasets[0].data = [s, a, v, 15, 15]; radar.update(); }
+            if(radar) { radar.data.datasets[0].data = [20, 20, 20, 15, 15]; radar.update(); }
         }
 
         function saveData() {
-            const data = { age: document.getElementById('age').value, h: document.getElementById('height').value, w: document.getElementById('weight').value, img: document.getElementById('img-hud').src };
-            localStorage.setItem('gem_v18_final', JSON.stringify(data)); updateSystemStats();
+            const data = { h: document.getElementById('height').value, w: document.getElementById('weight').value, img: document.getElementById('img-hud').src };
+            localStorage.setItem('gem_v18_restored', JSON.stringify(data)); updateSystemStats();
         }
 
         function loadData() {
-            const d = JSON.parse(localStorage.getItem('gem_v18_final'));
-            if(d) {
-                document.getElementById('age').value=d.age; document.getElementById('height').value=d.h; document.getElementById('weight').value=d.w;
-                document.getElementById('img-hud').src=d.img;
-            }
+            const d = JSON.parse(localStorage.getItem('gem_v18_restored'));
+            if(d) { document.getElementById('height').value=d.h; document.getElementById('weight').value=d.w; document.getElementById('img-hud').src=d.img; }
             updateSystemStats();
         }
 
