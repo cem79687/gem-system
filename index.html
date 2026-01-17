@@ -4,86 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Gem System v18.2</title>
+    <title>Gem System v18.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --solo-blue: #3d5afe; --solo-cyan: #00e5ff;
             --panel-bg: #0a0c12; --system-red: #ff3d3d;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
         body, html {
             margin: 0; padding: 0; width: 100%; min-height: 100%;
             background: #000; font-family: 'Rajdhani', sans-serif; color: #fff;
             display: flex; justify-content: center; align-items: flex-start;
             overflow-x: hidden;
         }
+        .hidden { display: none !important; }
 
-        .hud-wrapper {
-            width: 100%;
-            max-width: 440px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        /* LOGIN */
+        #login-overlay {
+            position: fixed; inset: 0; background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; padding: 20px;
         }
-
-        .hud-card {
+        .login-box {
+            width: 100%; max-width: 320px; text-align: center;
+            border: 1px solid var(--solo-cyan); padding: 30px; border-radius: 20px;
             background: var(--panel-bg);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            position: relative;
+        }
+        input.login-input {
+            width: 100%; padding: 15px; margin-bottom: 10px;
+            background: #111; border: 1px solid #333; color: #fff;
+            border-radius: 10px; text-align: center; font-family: inherit;
         }
 
-        .bio-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
-            margin-top: 15px;
+        /* HUD */
+        .hud-wrapper {
+            width: 100%; max-width: 440px; padding: 15px;
+            display: flex; flex-direction: column; gap: 12px;
         }
-
-        .bio-box {
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 8px;
+        .hud-card {
+            background: var(--panel-bg); border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 15px; padding: 18px; position: relative;
         }
-
-        input {
-            background: transparent; border: none; color: #fff;
-            font-size: 18px; width: 100%; font-family: inherit; outline: none;
+        .logout-btn {
+            position: absolute; top: 15px; left: 15px;
+            background: none; border: 1px solid var(--system-red);
+            color: var(--system-red); width: 30px; height: 30px;
+            border-radius: 50%; font-size: 14px;
         }
-
         #recovery-timer {
             position: absolute; top: 15px; right: 15px;
             border: 1px solid #ffcc00; padding: 5px 10px;
-            border-radius: 8px; color: #ffcc00; font-weight: bold;
-            text-align: center; font-size: 14px; cursor: pointer;
+            border-radius: 8px; color: #ffcc00; font-weight: bold; font-size: 14px;
         }
+        .bio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 20px; }
+        .bio-box { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; }
+        .bio-box input { background: transparent; border: none; color: #fff; font-size: 16px; width: 100%; outline: none; }
+        
+        .quest-list { font-size: 14px; color: #ddd; line-height: 1.8; }
+        .quest-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0; }
 
         .btn-action {
-            width: 100%; padding: 18px; background: var(--solo-blue);
+            width: 100%; padding: 16px; background: var(--solo-blue);
             color: white; border: none; border-radius: 12px;
-            font-weight: bold; letter-spacing: 2px; margin-top: 10px;
+            font-weight: bold; letter-spacing: 2px;
+        }
+        .btn-system {
+            width: 100%; padding: 12px; background: transparent;
+            color: var(--solo-cyan); border: 1px solid var(--solo-cyan);
+            border-radius: 12px; font-weight: bold; margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-<div class="hud-wrapper">
+<div id="login-overlay">
+    <div class="login-box">
+        <h2 style="color:var(--solo-cyan); letter-spacing:4px;">AUTHENTICATION</h2>
+        <input type="text" id="hID" class="login-input" placeholder="ID CHASSEUR">
+        <input type="password" id="hPWD" class="login-input" placeholder="CODE SÉCURITÉ">
+        <button class="btn-action" onclick="checkLogin()">S'ÉVEILLER</button>
+    </div>
+</div>
+
+<div id="main-content" class="hud-wrapper hidden">
     <div class="hud-card">
+        <button class="logout-btn" onclick="location.reload()">⏻</button>
         <div id="recovery-timer" onclick="startTimer()">
             <div style="font-size: 8px;">RECOVERY</div>
             <div id="time">00:30</div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--solo-cyan); background: #111;"></div>
-            <div>
+        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; margin-top: 10px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--solo-cyan); margin-bottom: 8px; background: #111;"></div>
+            <div style="text-align: center;">
                 <div style="font-size: 22px; font-weight: 700;">GEM</div>
-                <div style="font-size: 10px; color: var(--system-red);">RANG E</div>
+                <div style="font-size: 9px; color: var(--system-red); border: 1px solid var(--system-red); padding: 1px 8px; border-radius: 4px; display: inline-block;">RANG E</div>
             </div>
         </div>
 
@@ -96,14 +112,30 @@
     </div>
 
     <div class="hud-card">
-        <div style="font-size: 12px; margin-bottom: 10px; color: var(--solo-cyan);">QUÊTE QUOTIDIENNE</div>
-        <div style="font-size: 14px; color: #aaa;">• 50 POMPES<br>• 50 SQUATS</div>
+        <div style="font-size: 11px; margin-bottom: 8px; color: var(--solo-cyan); font-weight: bold;">MISSIONS QUOTIDIENNES</div>
+        <div class="quest-list">
+            <div class="quest-item"><span>• POMPES</span><span>0 / 50</span></div>
+            <div class="quest-item"><span>• SQUATS</span><span>0 / 50</span></div>
+            <div class="quest-item"><span>• ABDOS</span><span>0 / 50</span></div>
+            <div class="quest-item"><span>• TRACTIONS</span><span>0 / 20</span></div>
+            <div class="quest-item"><span>• COURSE</span><span>0 / 5 KM</span></div>
+        </div>
     </div>
 
-    <button class="btn-action" onclick="alert('Système prêt !')">ACCEPTER</button>
+    <button class="btn-action" onclick="alert('Quête acceptée !')">ACCEPTER</button>
+    <button class="btn-system" onclick="alert('Accès au Système central...')">SYSTÈME</button>
 </div>
 
 <script>
+    function checkLogin() {
+        const id = document.getElementById('hID').value.toUpperCase();
+        const pwd = document.getElementById('hPWD').value;
+        if(id === "GEM" && pwd === "1234") {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+        } else { alert("IDENTIFIANTS INCORRECTS"); }
+    }
+
     function startTimer() {
         let s = 30;
         const el = document.getElementById('time');
