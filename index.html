@@ -3,95 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gem System v18.4 - Inventory Restored</title>
+    <title>Gem System v18.6 - Full Integration</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
-            --solo-blue: #3d5afe; --solo-cyan: #00e5ff;
-            --panel-bg: #0a0c12; --system-red: #ff3d3d;
-            --system-green: #00ff88; --recovery-gold: #ffcc00;
+            --solo-blue: #3d5afe;
+            --solo-cyan: #00e5ff;
+            --panel-bg: #0a0c12;
+            --system-red: #ff3d3d;
+            --system-green: #00ff88;
+            --recovery-gold: #ffcc00;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background: #05070a radial-gradient(circle at center, #0d1233 0%, #000 100%);
             font-family: 'Rajdhani', sans-serif; color: #fff;
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
         }
 
         .hidden { display: none !important; }
 
-        /* --- LOGIN WINDOW --- */
-        #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: flex; align-items: center; justify-content: center; z-index: 50000; }
-        .login-card { background: var(--panel-bg); padding: 50px; border-radius: 20px; border: 1px solid var(--solo-cyan); text-align: center; width: 320px; }
-        .login-input { width: 100%; padding: 15px; background: #111; border: 1px solid #222; color: #fff; margin-bottom: 15px; text-align: center; border-radius: 8px; font-family: 'Rajdhani'; outline: none; }
+        /* =========================================
+           FENÊTRE DE CONNEXION (LOGIN)
+           ========================================= */
+        #login-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.98);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50000;
+        }
+        .login-card {
+            background: var(--panel-bg);
+            padding: 50px; border-radius: 20px;
+            border: 1px solid var(--solo-cyan);
+            text-align: center; width: 320px;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+        }
+        .login-card h3 {
+            letter-spacing: 5px; color: var(--solo-cyan);
+            margin-bottom: 30px; text-transform: uppercase;
+        }
+        .login-input {
+            width: 100%; padding: 15px;
+            background: #111; border: 1px solid #222;
+            color: #fff; margin-bottom: 15px;
+            text-align: center; border-radius: 8px;
+            font-family: 'Rajdhani'; outline: none;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            box-sizing: border-box;
+        }
 
-        /* --- HUD --- */
-        #hud-window { width: 90%; max-width: 420px; background: var(--panel-bg); border: 1px solid rgba(0, 229, 255, 0.1); border-radius: 28px; padding: 25px; position: relative; box-sizing: border-box; }
-        
-        #recovery-widget { position: absolute; top: 60px; right: 20px; width: 80px; text-align: center; border: 1px solid var(--recovery-gold); border-radius: 10px; padding: 5px; background: rgba(255, 204, 0, 0.05); cursor: pointer; }
+        /* =========================================
+           HUD PRINCIPAL (DASHBOARD)
+           ========================================= */
+        #hud-window {
+            width: 90%; max-width: 420px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 28px; padding: 25px;
+            position: relative; box-sizing: border-box;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
 
-        .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .bio-card { background: rgba(255,255,255,0.02); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .bio-label { font-size: 9px; color: var(--solo-blue); font-weight: 700; letter-spacing: 1px; display: block; }
-        .bio-input { background: transparent; border: none; color: #fff; font-family: 'JetBrains Mono'; font-weight: 700; font-size: 15px; width: 100%; outline: none; }
-        
-        .quest-item { padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; border-left: 3px solid #222; }
-        .quest-item.active { border-left-color: var(--solo-cyan); color: #fff; background: rgba(0, 229, 255, 0.05); }
-        
-        .btn-modern { width: 100%; padding: 15px; background: var(--solo-blue); border: none; border-radius: 12px; color: #fff; font-weight: 900; letter-spacing: 2px; cursor: pointer; }
+        /* Bouton Déconnexion */
+        .logout-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: none; border: 1px solid var(--system-red);
+            color: var(--system-red); border-radius: 50%;
+            width: 32px; height: 32px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; z-index: 100; transition: 0.3s;
+        }
+        .logout-btn:hover { background: var(--system-red); color: #fff; }
 
-        /* --- BOUTON SYSTEM BISEAUTÉ --- */
+        /* Widget Recovery */
+        #recovery-widget {
+            position: absolute; top: 65px; right: 20px;
+            width: 80px; text-align: center;
+            border: 1px solid var(--recovery-gold);
+            border-radius: 10px; padding: 5px;
+            background: rgba(255, 204, 0, 0.05);
+            cursor: pointer; z-index: 10;
+        }
+
+        /* Bio Grid */
+        .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 25px 0; }
+        .bio-card {
+            background: rgba(255,255,255,0.02);
+            padding: 12px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .bio-label {
+            font-size: 10px; color: var(--solo-blue);
+            font-weight: 700; letter-spacing: 1px;
+            display: block; margin-bottom: 4px;
+        }
+        .bio-input {
+            background: transparent; border: none;
+            color: #fff; font-family: 'JetBrains Mono';
+            font-weight: 700; font-size: 16px;
+            width: 100%; outline: none;
+        }
+
+        /* Missions */
+        .quest-item {
+            padding: 14px; background: rgba(255,255,255,0.02);
+            border-radius: 12px; margin-bottom: 8px;
+            display: flex; justify-content: space-between;
+            font-weight: 700; font-size: 13px;
+            border-left: 4px solid #222; transition: 0.3s;
+        }
+        .quest-item.active {
+            border-left-color: var(--solo-cyan);
+            background: rgba(0, 229, 255, 0.05);
+            color: #fff;
+        }
+
+        .btn-modern {
+            width: 100%; padding: 18px;
+            background: var(--solo-blue);
+            border: none; border-radius: 15px;
+            color: #fff; font-weight: 900;
+            letter-spacing: 3px; cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* =========================================
+           BOUTON SYSTEM (DESIGN BISEAUTÉ)
+           ========================================= */
         .side-btn-system {
             position: fixed; right: 0; top: 50%; transform: translateY(-50%);
-            width: 50px; height: 110px; cursor: pointer; z-index: 99999;
+            width: 55px; height: 120px; cursor: pointer; z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background: rgba(10, 12, 18, 0.95);
             clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%);
             border-left: 2px solid var(--system-red);
         }
-        .side-btn-system::before { content: ""; position: absolute; top: 0; width: 100%; height: 3px; background: var(--solo-cyan); box-shadow: 0 0 10px var(--solo-cyan); }
-        .side-btn-system::after { content: ""; position: absolute; bottom: 0; width: 100%; height: 3px; background: var(--system-red); box-shadow: 0 0 10px var(--system-red); }
-        .side-btn-system span { writing-mode: vertical-rl; text-orientation: mixed; font-weight: 900; font-size: 11px; color: #fff; letter-spacing: 2px; margin-top: 5px; }
+        .side-btn-system::before {
+            content: ""; position: absolute; top: 0; width: 100%; height: 4px;
+            background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan);
+        }
+        .side-btn-system::after {
+            content: ""; position: absolute; bottom: 0; width: 100%; height: 4px;
+            background: var(--system-red); box-shadow: 0 0 15px var(--system-red);
+        }
+        .side-btn-system span {
+            writing-mode: vertical-rl; text-orientation: mixed;
+            font-weight: 900; font-size: 12px; color: #fff;
+            letter-spacing: 3px; margin-top: 8px; text-transform: uppercase;
+        }
 
-        /* --- SYSTEM MODAL --- */
-        #system-modal { position: fixed; inset: 0; background: #05070a; z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        .os-window { width: 100%; max-width: 900px; height: 85vh; background: #0a0c12; border: 1px solid #1a1d26; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; }
-        .os-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1d26; }
-        .os-body { display: flex; flex: 1; padding: 20px; overflow-y: auto; gap: 20px; }
-        .tab-btn { background: #1a1d26; color: #555; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-family: 'Rajdhani'; font-weight: 700; margin-right: 5px; }
+        /* =========================================
+           INTERFACE SYSTEM (MODAL)
+           ========================================= */
+        #system-modal {
+            position: fixed; inset: 0;
+            background: #05070a; z-index: 20000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 15px;
+        }
+        .os-window {
+            width: 100%; max-width: 900px; height: 85vh;
+            background: #0a0c12; border: 1px solid #1a1d26;
+            border-radius: 20px; display: flex;
+            flex-direction: column; overflow: hidden;
+        }
+        .os-header {
+            padding: 20px; display: flex;
+            justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #1a1d26; background: rgba(255,255,255,0.01);
+        }
+        .os-body { display: flex; flex: 1; padding: 25px; overflow-y: auto; gap: 30px; }
+        
+        .tab-btn {
+            background: #1a1d26; color: #555; border: none;
+            padding: 10px 20px; border-radius: 8px;
+            cursor: pointer; font-family: 'Rajdhani';
+            font-weight: 700; margin-right: 8px;
+        }
         .tab-btn.active { background: var(--solo-blue); color: #fff; }
 
-        .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin-top: 15px; }
-        .inv-slot { height: 60px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #444; text-transform: uppercase; }
+        /* Inventaire */
+        .inv-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 15px; width: 100%; margin-top: 20px;
+        }
+        .inv-slot {
+            height: 70px; background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 12px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 11px; color: #444; text-transform: uppercase;
+            font-weight: 700; letter-spacing: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .os-body { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
         <div class="login-card">
-            <h3 style="letter-spacing: 4px; color: var(--solo-cyan);">SYSTEM LOGIN</h3>
-            <input type="password" id="hPWD" class="login-input" placeholder="CODE D'ACCÈS">
+            <h3>System Access</h3>
+            <input type="text" id="hID" class="login-input" placeholder="ID CHASSEUR">
+            <input type="password" id="hPWD" class="login-input" placeholder="MOT DE PASSE">
             <button class="btn-modern" onclick="secureLogin()">S'ÉVEILLER</button>
         </div>
     </div>
 
     <div id="main-dashboard" class="hidden">
         <div id="hud-window">
+            <button onclick="location.reload()" class="logout-btn">⏻</button>
+
             <div id="recovery-widget" onclick="toggleRestTimer()">
                 <div style="font-size: 8px; color: var(--recovery-gold); font-weight: bold;">RECOVERY</div>
                 <div id="rec-val" style="font-family: 'JetBrains Mono'; font-size: 14px;">00:30</div>
             </div>
 
-            <div style="display:flex; gap:15px; align-items:center;">
-                <div onclick="document.getElementById('avatar-file').click()" style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; cursor:pointer;">
-                    <img id="img-hud" src="https://via.placeholder.com/70/05070a/3d5afe" style="width:100%; height:100%; object-fit:cover;">
+            <div style="display:flex; gap:20px; align-items:center;">
+                <div onclick="document.getElementById('avatar-file').click()" style="width:75px; height:75px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; cursor:pointer; background: #000;">
+                    <img id="img-hud" src="https://via.placeholder.com/75/05070a/3d5afe" style="width:100%; height:100%; object-fit:cover;">
                     <input type="file" id="avatar-file" class="hidden" onchange="previewImage(this)">
                 </div>
                 <div>
-                    <div style="font-size:22px; font-weight:900;">GEM</div>
-                    <div style="border:1px solid var(--system-red); color:var(--system-red); font-size:9px; padding:1px 6px; border-radius:4px; display:inline-block;">RANG E</div>
+                    <div style="font-size:24px; font-weight:900; letter-spacing:2px;">GEM</div>
+                    <div style="border:1px solid var(--system-red); color:var(--system-red); font-size:10px; padding:2px 8px; border-radius:5px; display:inline-block; font-weight:bold;">RANG E</div>
                 </div>
             </div>
 
@@ -109,37 +252,53 @@
                 <div class="quest-item" id="q4"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
                 <div id="mission-timer" style="font-family:'JetBrains Mono'; font-size:18px; color:var(--system-red); font-weight:bold;">24:00:00</div>
-                <button id="accept-btn" class="btn-modern" style="width:130px; padding:12px;" onclick="revealQuests()">ACCEPTER</button>
+                <button id="accept-btn" class="btn-modern" style="width:140px; padding:12px; font-size:12px;" onclick="revealQuests()">ACCEPTER</button>
             </div>
         </div>
     </div>
 
     <div id="side-system-btn" class="side-btn-system hidden" onclick="toggleSystem()">
-        <div style="font-size:18px; color:var(--system-red);">⚠️</div>
+        <div style="font-size:20px; color:var(--system-red);">⚠️</div>
         <span>SYSTEM</span>
     </div>
 
     <div id="system-modal" class="hidden">
         <div class="os-window">
             <div class="os-header">
-                <div style="display:flex; gap:5px;">
-                    <button id="btn-stats" class="tab-btn active" onclick="switchTab('stats')">STATS</button>
-                    <button id="btn-inv" class="tab-btn" onclick="switchTab('inv')">INV</button>
+                <div style="display:flex;">
+                    <button id="btn-stats" class="tab-btn active" onclick="switchTab('stats')">STATISTIQUES</button>
+                    <button id="btn-inv" class="tab-btn" onclick="switchTab('inv')">INVENTAIRE</button>
                 </div>
-                <button onclick="toggleSystem()" style="background:none; border:1px solid #333; color:#666; padding:5px 10px; border-radius:5px; font-size:10px;">RETOUR</button>
+                <button onclick="toggleSystem()" style="background:none; border:1px solid #333; color:#888; padding:8px 15px; border-radius:8px; font-size:11px; cursor:pointer;">FERMER</button>
             </div>
             <div class="os-body">
                 <div id="stats-content" style="flex:1; display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:100%; height:250px;"><canvas id="radarChart"></canvas></div>
+                    <div style="width:100%; height:300px;"><canvas id="radarChart"></canvas></div>
+                    <div style="width:100%; margin-top:20px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                        <div style="background:#0f121a; padding:15px; border-bottom:2px solid var(--solo-cyan); text-align:center;">
+                            <div style="font-size:10px; color:var(--solo-blue);">FORCE</div>
+                            <div id="s-str" style="font-size:18px; font-weight:bold;">--</div>
+                        </div>
+                        <div style="background:#0f121a; padding:15px; border-bottom:2px solid var(--solo-cyan); text-align:center;">
+                            <div style="font-size:10px; color:var(--solo-blue);">AGILITÉ</div>
+                            <div id="s-agi" style="font-size:18px; font-weight:bold;">--</div>
+                        </div>
+                        <div style="background:#0f121a; padding:15px; border-bottom:2px solid var(--solo-cyan); text-align:center;">
+                            <div style="font-size:10px; color:var(--solo-blue);">VITALITÉ</div>
+                            <div id="s-vit" style="font-size:18px; font-weight:bold;">--</div>
+                        </div>
+                    </div>
                 </div>
                 <div id="inv-content" class="hidden" style="flex:1;">
-                    <div style="height:150px; background:rgba(255,255,255,0.05); border:1px dashed #333; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#555;">[ APERÇU ÉQUIPEMENT ]</div>
+                    <div style="height:180px; background:rgba(255,255,255,0.03); border:1px dashed #333; border-radius:15px; display:flex; align-items:center; justify-content:center; color:#555; font-weight:bold;">
+                        [ ÉQUIPEMENT ACTIF ]
+                    </div>
                     <div class="inv-grid">
-                        <div class="inv-slot">Casque</div><div class="inv-slot">Armure</div>
-                        <div class="inv-slot">Gants</div><div class="inv-slot">Bottes</div>
-                        <div class="inv-slot">Arme</div><div class="inv-slot">Accessoire</div>
+                        <div class="inv-slot">CASQUE</div><div class="inv-slot">ARMURE</div>
+                        <div class="inv-slot">GANTS</div><div class="inv-slot">BOTTES</div>
+                        <div class="inv-slot">ARME</div><div class="inv-slot">OBJET</div>
                     </div>
                 </div>
             </div>
@@ -149,25 +308,36 @@
     <script>
         let radar, restInterval, dailyInterval;
 
+        /* LOGIQUE DE CONNEXION */
         function secureLogin() {
-            if(document.getElementById('hPWD').value === "1234") {
+            const id = document.getElementById('hID').value.toUpperCase();
+            const pwd = document.getElementById('hPWD').value;
+            if(id === "GEM" && pwd === "1234") {
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('main-dashboard').classList.remove('hidden');
                 document.getElementById('side-system-btn').classList.remove('hidden');
                 loadData();
+            } else {
+                alert("IDENTIFIANTS INCORRECTS");
             }
         }
 
+        /* TIMER DE RÉCUPÉRATION (30S) */
         function toggleRestTimer() {
             let timeLeft = 30;
             clearInterval(restInterval);
             restInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('rec-val').innerText = `00:${timeLeft.toString().padStart(2,'0')}`;
-                if(timeLeft <= 0) { clearInterval(restInterval); alert("REPOS TERMINÉ"); document.getElementById('rec-val').innerText = "00:30"; }
+                if(timeLeft <= 0) { 
+                    clearInterval(restInterval); 
+                    alert("RECOVERY COMPLETE"); 
+                    document.getElementById('rec-val').innerText = "00:30"; 
+                }
             }, 1000);
         }
 
+        /* RÉVÉLATION DES QUÊTES & TIMER 24H */
         function revealQuests() {
             document.getElementById('accept-btn').style.display = "none";
             let totalSeconds = 24 * 3600;
@@ -176,6 +346,7 @@
                 let h = Math.floor(totalSeconds/3600), m = Math.floor((totalSeconds%3600)/60), s = totalSeconds%60;
                 document.getElementById('mission-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }, 1000);
+
             const EX = ["POMPES x30", "ABDOS x50", "SQUATS x40", "PLANCHE 1 MIN"];
             for(let i=1; i<=4; i++) {
                 document.getElementById('q'+i).innerHTML = `<span>${EX[i-1]}</span><span style="color:var(--solo-cyan);">EN COURS</span>`;
@@ -183,6 +354,7 @@
             }
         }
 
+        /* NAVIGATION SYSTÈME */
         function switchTab(t) {
             document.getElementById('stats-content').className = (t==='stats'?'':'hidden');
             document.getElementById('inv-content').className = (t==='inv'?'':'hidden');
@@ -190,36 +362,88 @@
             document.getElementById('btn-inv').className = 'tab-btn'+(t==='inv'?' active':'');
         }
 
+        function toggleSystem() { 
+            document.getElementById('system-modal').classList.toggle('hidden'); 
+            if(!radar) initRadar(); 
+        }
+
+        /* CALCULS STATS & IMC */
         function updateSystemStats() {
-            const w = parseFloat(document.getElementById('weight').value)||0, h = parseFloat(document.getElementById('height').value)||0;
+            const w = parseFloat(document.getElementById('weight').value)||0;
+            const h = parseFloat(document.getElementById('height').value)||0;
             const imc = h>0 ? (w/((h/100)**2)) : 0;
             document.getElementById('imc').innerText = imc.toFixed(1);
-            if(radar) { radar.data.datasets[0].data = [20, 20, 20, 15, 15]; radar.update(); }
+
+            let s=Math.floor(w/5), v=Math.floor(w/4), a=imc>0?Math.floor(100/imc)*2:10;
+            document.getElementById('s-str').innerText=s;
+            document.getElementById('s-agi').innerText=a;
+            document.getElementById('s-vit').innerText=v;
+
+            if(radar) { 
+                radar.data.datasets[0].data = [s, a, v, 20, 20]; 
+                radar.update(); 
+            }
         }
 
+        /* SAUVEGARDE & CHARGEMENT */
         function saveData() {
-            const data = { h: document.getElementById('height').value, w: document.getElementById('weight').value, img: document.getElementById('img-hud').src };
-            localStorage.setItem('gem_v18_restored', JSON.stringify(data)); updateSystemStats();
-        }
-
-        function loadData() {
-            const d = JSON.parse(localStorage.getItem('gem_v18_restored'));
-            if(d) { document.getElementById('height').value=d.h; document.getElementById('weight').value=d.w; document.getElementById('img-hud').src=d.img; }
+            const data = { 
+                age: document.getElementById('age').value, 
+                h: document.getElementById('height').value, 
+                w: document.getElementById('weight').value, 
+                img: document.getElementById('img-hud').src 
+            };
+            localStorage.setItem('gem_v18_final_storage', JSON.stringify(data)); 
             updateSystemStats();
         }
 
+        function loadData() {
+            const d = JSON.parse(localStorage.getItem('gem_v18_final_storage'));
+            if(d) { 
+                document.getElementById('age').value=d.age;
+                document.getElementById('height').value=d.h; 
+                document.getElementById('weight').value=d.w; 
+                document.getElementById('img-hud').src=d.img; 
+            }
+            updateSystemStats();
+        }
+
+        /* PHOTO PROFIL */
         function previewImage(i) {
-            const r = new FileReader(); r.onload=(e)=>{ document.getElementById('img-hud').src=e.target.result; saveData(); };
+            const r = new FileReader(); 
+            r.onload=(e)=>{ 
+                document.getElementById('img-hud').src=e.target.result; 
+                saveData(); 
+            };
             r.readAsDataURL(i.files[0]);
         }
 
-        function toggleSystem() { document.getElementById('system-modal').classList.toggle('hidden'); if(!radar) initRadar(); }
-
+        /* RADAR CHART */
         function initRadar() {
             radar = new Chart(document.getElementById('radarChart'), {
                 type: 'radar',
-                data: { labels: ['STR', 'AGI', 'VIT', 'INT', 'PER'], datasets: [{ data: [15,15,15,15,15], backgroundColor: 'rgba(0, 229, 255, 0.2)', borderColor: '#00e5ff', borderWidth: 2 }] },
-                options: { maintainAspectRatio: false, scales: { r: { min: 0, max: 60, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.1)' } } }, plugins: { legend: { display: false } } }
+                data: { 
+                    labels: ['STR', 'AGI', 'VIT', 'INT', 'PER'], 
+                    datasets: [{ 
+                        data: [15,15,15,15,15], 
+                        backgroundColor: 'rgba(0, 229, 255, 0.2)', 
+                        borderColor: '#00e5ff', 
+                        borderWidth: 2,
+                        pointBackgroundColor: '#00e5ff'
+                    }] 
+                },
+                options: { 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        r: { 
+                            min: 0, max: 60, 
+                            ticks: { display: false }, 
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            angleLines: { color: 'rgba(255,255,255,0.1)' }
+                        } 
+                    }, 
+                    plugins: { legend: { display: false } } 
+                }
             });
             updateSystemStats();
         }
