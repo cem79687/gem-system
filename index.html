@@ -3,653 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gem System v18.7 - Full Extended</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <title>Hunter v1 - Neural Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;500;700;800&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --solo-blue: #3d5afe;
-            --solo-cyan: #00e5ff;
-            --panel-bg: #0a0c12;
-            --system-red: #ff3d3d;
-            --system-green: #00ff88;
-            --recovery-gold: #ffcc00;
+            --solo-blue: #3b82f6; --solo-cyan: #00e5ff; --panel-bg: #07090e;
+            --card-bg: #0d1017; --system-red: #ff3d3d; --system-green: #00ff88;
+            --recovery-gold: #ffcc00; --ai-primary: #3b82f6; --text-muted: #94a3b8;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #05070a radial-gradient(circle at center, #0d1233 0%, #000 100%);
-            font-family: 'Rajdhani', sans-serif;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; height: 100%; background: #0a0a0f; font-family: 'Inter', sans-serif; color: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .hidden { display: none !important; }
 
-        .hidden { 
-            display: none !important; 
-        }
-
-        /* =========================================
-           FENÊTRE DE CONNEXION (LOGIN)
-           ========================================= 
-        */
-        #login-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.98);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50000;
-        }
-
+        /* --- FENETRE DE CONNEXION (Hunter v1 Edition) --- */
+        .login-container { z-index: 1000; width: 100%; max-width: 440px; padding: 20px; transition: opacity 0.5s ease; }
         .login-card {
-            background: var(--panel-bg);
-            padding: 50px;
-            border-radius: 20px;
-            border: 1px solid var(--solo-cyan);
-            text-align: center;
-            width: 320px;
-            box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+            background: rgba(13, 16, 23, 0.9); backdrop-filter: blur(25px);
+            padding: 50px 40px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center; position: relative; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+        
+        .ai-logo-selector { 
+            width: 70px; height: 70px; background: rgba(59, 130, 246, 0.1); 
+            border-radius: 20px; display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 30px; color: var(--ai-primary); border: 1px solid rgba(59, 130, 246, 0.2);
+            cursor: pointer; overflow: hidden; position: relative;
+        }
+        .ai-logo-selector img { width: 100%; height: 100%; object-fit: cover; }
+
+        .login-header h2 { font-family: 'Orbitron'; font-size: 1.7rem; margin-bottom: 10px; letter-spacing: 1px; }
+        .login-header p { color: var(--text-muted); font-size: 14px; margin-bottom: 40px; }
+        
+        .input-group { text-align: left; margin-bottom: 25px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .neural-input { width: 100%; background: rgba(15, 17, 26, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 14px; color: #fff; outline: none; transition: 0.3s; }
+        
+        .remember-container { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-size: 13px; }
+
+        .btn-init { width: 100%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
+        .btn-init:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); }
+
+        /* --- SYNC LOADER --- */
+        #sync-loader { text-align: center; z-index: 2000; display: none; }
+        .loader-bar-container { width: 300px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 20px auto; overflow: hidden; position: relative; }
+        .loader-fill { height: 100%; width: 0%; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); transition: width 0.1s linear; }
+        .sync-text { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--solo-cyan); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* --- HUD ORIGINAL --- */
+        .hud-wrapper { position: relative; display: flex; align-items: center; z-index: 100; animation: hudPop 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        @keyframes hudPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        
+        #hud-container {
+            width: 375px; height: 812px; background: var(--panel-bg); border-radius: 40px;
+            padding: 25px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex; flex-direction: column;
         }
 
-        .login-card h3 {
-            letter-spacing: 5px;
-            color: var(--solo-cyan);
-            margin-bottom: 30px;
-            text-transform: uppercase;
+        .system-side-btn {
+            position: absolute; right: -30px; top: 50%; transform: translateY(-50%);
+            background: var(--solo-blue); color: white; padding: 20px 5px; border-radius: 0 8px 8px 0;
+            font-family: 'Orbitron'; font-size: 10px; font-weight: 900; writing-mode: vertical-rl;
+            text-orientation: uppercase; cursor: pointer; border: 1px solid var(--solo-cyan); border-left: none;
         }
 
-        .login-input {
-            width: 100%;
-            padding: 15px;
-            background: #111;
-            border: 1px solid #222;
-            color: #fff;
-            margin-bottom: 15px;
-            text-align: center;
-            border-radius: 8px;
-            font-family: 'Rajdhani';
-            outline: none;
-            border: 1px solid rgba(0, 229, 255, 0.1);
-            box-sizing: border-box;
-        }
+        .stat-card { background: var(--card-bg); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); }
+        .stat-label { font-size: 7px; color: var(--solo-blue); font-family: 'Orbitron'; display: block; }
+        .stat-value { font-family: 'JetBrains Mono'; font-size: 14px; color: #fff; background: none; border: none; width: 100%; outline: none; }
+        
+        .mission-box { background: rgba(255, 255, 255, 0.02); border-left: 3px solid #1a1d26; padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
+        .mission-box.active { border-left-color: var(--solo-cyan); background: rgba(0, 229, 255, 0.03); }
+        .mission-box.completed { border-left-color: var(--system-green); opacity: 0.4; }
 
-        /* =========================================
-           HUD PRINCIPAL (DASHBOARD)
-           ========================================= 
-        */
-        #hud-window {
-            width: 90%;
-            max-width: 420px;
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 229, 255, 0.1);
-            border-radius: 28px;
-            padding: 25px;
-            position: relative;
-            box-sizing: border-box;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-        }
-
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: 1px solid var(--system-red);
-            color: var(--system-red);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            z-index: 100;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: var(--system-red);
-            color: #fff;
-        }
-
-        #recovery-widget {
-            position: absolute;
-            top: 65px;
-            right: 20px;
-            width: 80px;
-            text-align: center;
-            border: 1px solid var(--recovery-gold);
-            border-radius: 10px;
-            padding: 5px;
-            background: rgba(255, 204, 0, 0.05);
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        /* BIO GRID */
-        .bio-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 25px 0;
-        }
-
-        .bio-card {
-            background: rgba(255,255,255,0.02);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .bio-label {
-            font-size: 10px;
-            color: var(--solo-blue);
-            font-weight: 700;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .bio-input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-family: 'JetBrains Mono';
-            font-weight: 700;
-            font-size: 16px;
-            width: 100%;
-            outline: none;
-        }
-
-        /* MISSIONS */
-        .quest-item {
-            padding: 14px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            font-weight: 700;
-            font-size: 13px;
-            border-left: 4px solid #222;
-            transition: 0.3s;
-        }
-
-        .quest-item.active {
-            border-left-color: var(--solo-cyan);
-            background: rgba(0, 229, 255, 0.05);
-            color: #fff;
-        }
-
-        .btn-modern {
-            width: 100%;
-            padding: 18px;
-            background: var(--solo-blue);
-            border: none;
-            border-radius: 15px;
-            color: #fff;
-            font-weight: 900;
-            letter-spacing: 3px;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        /* =========================================
-           BOUTON SYSTEM (DESIGN BISEAUTÉ)
-           ========================================= 
-        */
-        .side-btn-system {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 55px;
-            height: 120px;
-            cursor: pointer;
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(10, 12, 18, 0.95);
-            clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%);
-            border-left: 2px solid var(--system-red);
-        }
-
-        .side-btn-system::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--solo-cyan);
-            box-shadow: 0 0 15px var(--solo-cyan);
-        }
-
-        .side-btn-system::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--system-red);
-            box-shadow: 0 0 15px var(--system-red);
-        }
-
-        .side-btn-system span {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            font-weight: 900;
-            font-size: 12px;
-            color: #fff;
-            letter-spacing: 3px;
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
-
-        /* =========================================
-           INTERFACE SYSTEM (MODAL)
-           ========================================= 
-        */
-        #system-modal {
-            position: fixed;
-            inset: 0;
-            background: #05070a;
-            z-index: 20000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .os-window {
-            width: 100%;
-            max-width: 900px;
-            height: 85vh;
-            background: #0a0c12;
-            border: 1px solid #1a1d26;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .os-header {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1a1d26;
-            background: rgba(255,255,255,0.01);
-        }
-
-        .os-body {
-            display: flex;
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            gap: 30px;
-        }
-
-        .tab-btn {
-            background: #1a1d26;
-            color: #555;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Rajdhani';
-            font-weight: 700;
-            margin-right: 8px;
-        }
-
-        .tab-btn.active {
-            background: var(--solo-blue);
-            color: #fff;
-        }
-
-        /* Profil Stats */
-        .stats-profile-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 15px;
-            border: 1px solid rgba(0, 229, 255, 0.1);
-        }
-
-        .stats-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2px solid var(--solo-cyan);
-            object-fit: cover;
-            background: #000;
-        }
-
-        /* Inventaire */
-        .inv-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .inv-slot {
-            height: 70px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(0, 229, 255, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            color: #444;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        @media (max-width: 600px) {
-            .os-body {
-                flex-direction: column;
-            }
-        }
+        .recovery-widget { border: 1.5px solid #333; padding: 5px; border-radius: 4px; text-align: center; min-width: 80px; }
+        .recovery-active { border-color: var(--recovery-gold) !important; color: var(--recovery-gold); }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
+    <div id="login-screen" class="login-container">
         <div class="login-card">
-            <h3>System Access</h3>
-            <input type="text" id="hID" class="login-input" placeholder="ID CHASSEUR">
-            <input type="password" id="hPWD" class="login-input" placeholder="MOT DE PASSE">
-            <button class="btn-modern" onclick="secureLogin()">S'ÉVEILLER</button>
-        </div>
-    </div>
-
-    <div id="main-dashboard" class="hidden">
-        <div id="hud-window">
+            <div class="ai-logo-selector" onclick="document.getElementById('avatar-input').click()">
+                <img id="login-preview" src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+            </div>
+            <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="previewLoginAvatar(this)">
             
-            <button onclick="location.reload()" class="logout-btn">⏻</button>
-
-            <div id="recovery-widget" onclick="toggleRestTimer()">
-                <div style="font-size: 8px; color: var(--recovery-gold); font-weight: bold;">RECOVERY</div>
-                <div id="rec-val" style="font-family: 'JetBrains Mono'; font-size: 14px;">00:30</div>
-            </div>
-
-            <div style="display:flex; gap:20px; align-items:center;">
-                <div onclick="document.getElementById('avatar-file').click()" style="width:75px; height:75px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; cursor:pointer; background: #000;">
-                    <img id="img-hud" src="https://via.placeholder.com/75/05070a/3d5afe" style="width:100%; height:100%; object-fit:cover;">
-                    <input type="file" id="avatar-file" class="hidden" onchange="previewImage(this)">
-                </div>
-                <div>
-                    <div style="font-size:24px; font-weight:900; letter-spacing:2px;">GEM</div>
-                    <div style="border:1px solid var(--system-red); color:var(--system-red); font-size:10px; padding:2px 8px; border-radius:5px; display:inline-block; font-weight:bold;">RANG E</div>
-                </div>
-            </div>
-
-            <div class="bio-grid">
-                <div class="bio-card">
-                    <span class="bio-label">ÂGE</span>
-                    <input type="number" id="age" class="bio-input" value="33" onchange="saveData()">
-                </div>
-                <div class="bio-card">
-                    <span class="bio-label">IMC</span>
-                    <div id="imc" class="bio-input" style="color:var(--system-green);">--</div>
-                </div>
-                <div class="bio-card">
-                    <span class="bio-label">TAILLE (CM)</span>
-                    <input type="number" id="height" class="bio-input" value="186" onchange="saveData()">
-                </div>
-                <div class="bio-card">
-                    <span class="bio-label">POIDS (KG)</span>
-                    <input type="number" id="weight" class="bio-input" value="80" onchange="saveData()">
-                </div>
-            </div>
-
-            <div id="quest-container">
-                <div class="quest-item" id="q1"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
-                <div class="quest-item" id="q2"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
-                <div class="quest-item" id="q3"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
-                <div class="quest-item" id="q4"><span>[ MISSION SCELLÉE ]</span><span>?? / ??</span></div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
-                <div id="mission-timer" style="font-family:'JetBrains Mono'; font-size:18px; color:var(--system-red); font-weight:bold;">24:00:00</div>
-                <button id="accept-btn" class="btn-modern" style="width:140px; padding:12px; font-size:12px;" onclick="revealQuests()">ACCEPTER</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="side-system-btn" class="side-btn-system hidden" onclick="toggleSystem()">
-        <div style="font-size:20px; color:var(--system-red);">⚠️</div>
-        <span>SYSTEM</span>
-    </div>
-
-    <div id="system-modal" class="hidden">
-        <div class="os-window">
-            <div class="os-header">
-                <div style="display:flex;">
-                    <button id="btn-stats" class="tab-btn active" onclick="switchTab('stats')">STATISTIQUES</button>
-                    <button id="btn-inv" class="tab-btn" onclick="switchTab('inv')">INVENTAIRE</button>
-                </div>
-                <button onclick="toggleSystem()" style="background:none; border:1px solid #333; color:#888; padding:8px 15px; border-radius:8px; font-size:11px; cursor:pointer;">FERMER</button>
+            <div class="login-header">
+                <h2>Neural Access</h2>
+                <p>Hunter v1 Professional Suite</p>
             </div>
             
-            <div class="os-body">
-                <div id="stats-content" style="flex:1; display:flex; flex-direction:column; align-items:center;">
-                    
-                    <div class="stats-profile-header">
-                        <img id="img-stats" src="https://via.placeholder.com/60" class="stats-avatar">
-                        <div>
-                            <div style="font-size: 20px; font-weight: 900; color: var(--solo-cyan);">GEM</div>
-                            <div style="font-size: 12px; color: var(--system-red); font-weight: bold; letter-spacing: 2px;">RANG E</div>
-                        </div>
-                    </div>
+            <div class="input-group">
+                <label>Identifier</label>
+                <input type="text" id="hunter-id" class="neural-input" placeholder="Hunter Name...">
+            </div>
+            
+            <div class="input-group">
+                <label>Passcode</label>
+                <input type="password" id="hunter-pass" class="neural-input" placeholder="••••••••">
+            </div>
 
-                    <div style="width:100%; height:300px;">
-                        <canvas id="radarChart"></canvas>
-                    </div>
+            <label class="remember-container">
+                <input type="checkbox" id="remember-me"> Se souvenir de moi
+            </label>
+            
+            <button onclick="startSync()" class="btn-init">Initialize Hunter Protocol</button>
+            
+            <div style="margin: 25px 0; font-size: 9px; color: #333; letter-spacing: 3px; font-weight: 800;">SYSTÈME HUNTER V1.0</div>
+        </div>
+    </div>
 
-                    <div style="width:100%; margin-top:20px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                        <div style="background:#0f121a; padding:15px; border-bottom:2px solid var(--solo-cyan); text-align:center;">
-                            <div style="font-size:10px; color:var(--solo-blue);">FORCE</div>
-                            <div id="s-str" style="font-size:18px; font-weight:bold;">--</div>
-                        </div>
-                        <div style="background:#0f121a; padding:15px; border-bottom:2px solid var(--solo-cyan); text-align:center;">
-                            <div style="font-size:10px; color:var(--solo-blue);">AGILITÉ</div>
-                            <div id="s-agi" style="font-size:18px; font-weight:bold;">--</div>
-                        </div>
-                        <div style="background:#0f121a; padding:15px; border-bottom:2px solid var(--solo-cyan); text-align:center;">
-                            <div style="font-size:10px; color:var(--solo-blue);">VITALITÉ</div>
-                            <div id="s-vit" style="font-size:18px; font-weight:bold;">--</div>
-                        </div>
+    <div id="sync-loader">
+        <div class="sync-text" id="sync-status">Initialisation Hunter v1...</div>
+        <div class="loader-bar-container">
+            <div id="loader-fill" class="loader-fill"></div>
+        </div>
+    </div>
+
+    <div id="main-hud" class="hud-wrapper hidden">
+        <div id="hud-container">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
+                        <img id="avatar-hud" src="" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div>
+                        <div id="display-name" style="font-family:'Orbitron'; font-size:18px; font-weight:900;">HUNTER</div>
+                        <div style="color:var(--system-red); font-family:'Orbitron'; font-size:10px; border:1px solid var(--system-red); padding:2px 5px; display:inline-block; margin-top:5px;">RANG E</div>
                     </div>
                 </div>
-
-                <div id="inv-content" class="hidden" style="flex:1;">
-                    <div style="height:180px; background:rgba(255,255,255,0.03); border:1px dashed #333; border-radius:15px; display:flex; align-items:center; justify-content:center; color:#555; font-weight:bold;">
-                        [ ÉQUIPEMENT ACTIF ]
-                    </div>
-                    <div class="inv-grid">
-                        <div class="inv-slot">CASQUE</div>
-                        <div class="inv-slot">ARMURE</div>
-                        <div class="inv-slot">GANTS</div>
-                        <div class="inv-slot">BOTTES</div>
-                        <div class="inv-slot">ARME</div>
-                        <div class="inv-slot">OBJET</div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div onclick="location.reload()" style="color:var(--system-red); cursor:pointer; font-size:22px; margin-bottom:5px;">⏻</div>
+                    <div id="rec-widget" class="recovery-widget">
+                        <div style="font-size:7px; color:var(--recovery-gold); font-family:'Orbitron';">RECOVERY</div>
+                        <div id="rec-timer" style="font-family:'JetBrains Mono'; font-size:12px;">00:00</div>
                     </div>
                 </div>
             </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <div class="stat-card"><span class="stat-label">GENRE</span><select id="u-sex" class="stat-value" onchange="save()"><option value="M">♂ MALE</option><option value="F">♀ FEMALE</option></select></div>
+                <div class="stat-card"><span class="stat-label">IMC</span><div id="u-imc" class="stat-value">0.0</div></div>
+                <div class="stat-card"><span class="stat-label">ÂGE</span><input type="number" id="u-age" class="stat-value" onchange="save()"></div>
+                <div class="stat-card"><span class="stat-label">TAILLE (CM)</span><input type="number" id="u-height" class="stat-value" onchange="save()"></div>
+                <div class="stat-card" style="grid-column: span 2;"><span class="stat-label">POIDS (KG)</span><input type="number" id="u-weight" class="stat-value" onchange="save()"></div>
+            </div>
+
+            <div id="mission-container" style="flex-grow:1; margin-top:20px; overflow-y:auto;"></div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                <div id="main-timer" style="font-family:'JetBrains Mono'; font-size:20px; color:var(--system-red); font-weight:700;">24:00:00</div>
+                <button id="btn-accept" class="btn-init" style="width:auto; padding:10px 20px;" onclick="acceptMissions()">ACCEPTER</button>
+            </div>
         </div>
+        <div class="system-side-btn">SYSTEM</div>
     </div>
 
     <script>
-        let radar, restInterval, dailyInterval;
+        const KEY = "HUNTER_V1_STORAGE";
+        let currentLvl = 1, completed = 0, isRecovering = false, dailyTimer = null, timeLeft = 86400;
 
-        // CONNEXION
-        function secureLogin() {
-            const id = document.getElementById('hID').value.toUpperCase();
-            const pwd = document.getElementById('hPWD').value;
-            
-            if(id === "GEM" && pwd === "1234") {
-                document.getElementById('login-overlay').classList.add('hidden');
-                document.getElementById('main-dashboard').classList.remove('hidden');
-                document.getElementById('side-system-btn').classList.remove('hidden');
-                loadData();
-            } else {
-                alert("ACCÈS REFUSÉ : IDENTIFIANTS INCORRECTS");
+        function previewLoginAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => { 
+                    document.getElementById('login-preview').src = e.target.result;
+                    document.getElementById('avatar-hud').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // TIMER RECOVERY
-        function toggleRestTimer() {
-            let timeLeft = 30;
-            clearInterval(restInterval);
-            restInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('rec-val').innerText = `00:${timeLeft.toString().padStart(2,'0')}`;
-                if(timeLeft <= 0) { 
-                    clearInterval(restInterval); 
-                    alert("RECOVERY COMPLETE"); 
-                    document.getElementById('rec-val').innerText = "00:30"; 
+        function startSync() {
+            const user = document.getElementById('hunter-id').value;
+            if(!user) return alert("Nom de Hunter requis");
+            document.getElementById('login-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('sync-loader').style.display = 'block';
+                let progress = 0;
+                const fill = document.getElementById('loader-fill');
+                const status = document.getElementById('sync-status');
+                const messages = ["Link Start...", "DNA Syncing...", "HUD Rendering...", "Access Granted"];
+                const interval = setInterval(() => {
+                    progress += 4;
+                    fill.style.width = progress + '%';
+                    if(progress % 25 === 0) status.innerText = messages[Math.floor(progress/26)];
+                    if(progress >= 100) {
+                        clearInterval(interval);
+                        document.getElementById('sync-loader').classList.add('hidden');
+                        document.getElementById('main-hud').classList.remove('hidden');
+                        document.getElementById('display-name').innerText = user.toUpperCase();
+                        load();
+                    }
+                }, 40);
+            }, 500);
+        }
+
+        function save() {
+            const h = parseFloat(document.getElementById('u-height').value) || 0;
+            const w = parseFloat(document.getElementById('u-weight').value) || 0;
+            const imcEl = document.getElementById('u-imc');
+            if(h > 0) {
+                const imc = (w / ((h/100)**2)).toFixed(1);
+                imcEl.innerText = imc;
+                imcEl.style.color = (imc >= 18.5 && imc <= 25) ? "#00ff88" : "#ff3d3d";
+            }
+            const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, remember: document.getElementById('remember-me').checked };
+            localStorage.setItem(KEY, JSON.stringify(data));
+        }
+
+        function load() {
+            const d = JSON.parse(localStorage.getItem(KEY));
+            if(d) {
+                currentLvl = d.lvl || 1;
+                document.getElementById('u-age').value = d.age || "";
+                document.getElementById('u-height').value = d.h || "";
+                document.getElementById('u-weight').value = d.w || "";
+                document.getElementById('u-sex').value = d.sex || "M";
+                document.getElementById('remember-me').checked = d.remember || false;
+                if(d.avatar) {
+                    document.getElementById('avatar-hud').src = d.avatar;
+                    document.getElementById('login-preview').src = d.avatar;
                 }
-            }, 1000);
-        }
-
-        // QUÊTES
-        function revealQuests() {
-            document.getElementById('accept-btn').style.display = "none";
-            let totalSeconds = 24 * 3600;
-            
-            dailyInterval = setInterval(() => {
-                totalSeconds--;
-                let h = Math.floor(totalSeconds/3600), m = Math.floor((totalSeconds%3600)/60), s = totalSeconds%60;
-                document.getElementById('mission-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            }, 1000);
-
-            const EX = ["POMPES x30", "ABDOS x50", "SQUATS x40", "PLANCHE 1 MIN"];
-            for(let i=1; i<=4; i++) {
-                document.getElementById('q'+i).innerHTML = `<span>${EX[i-1]}</span><span style="color:var(--solo-cyan);">EN COURS</span>`;
-                document.getElementById('q'+i).classList.add('active');
+                save();
             }
+            initMissions(false);
         }
 
-        // NAVIGATION TABS
-        function switchTab(t) {
-            document.getElementById('stats-content').className = (t==='stats'?'':'hidden');
-            document.getElementById('inv-content').className = (t==='inv'?'':'hidden');
-            document.getElementById('btn-stats').className = 'tab-btn'+(t==='stats'?' active':'');
-            document.getElementById('btn-inv').className = 'tab-btn'+(t==='inv'?' active':'');
-        }
-
-        function toggleSystem() { 
-            document.getElementById('system-modal').classList.toggle('hidden'); 
-            if(!radar) initRadar(); 
-        }
-
-        // LOGIQUE STATS
-        function updateSystemStats() {
-            const w = parseFloat(document.getElementById('weight').value)||0;
-            const h = parseFloat(document.getElementById('height').value)||0;
-            const imc = h>0 ? (w/((h/100)**2)) : 0;
-            
-            document.getElementById('imc').innerText = imc.toFixed(1);
-
-            let s = Math.floor(w/5);
-            let v = Math.floor(w/4);
-            let a = imc > 0 ? Math.floor(100/imc)*2 : 10;
-
-            document.getElementById('s-str').innerText = s;
-            document.getElementById('s-agi').innerText = a;
-            document.getElementById('s-vit').innerText = v;
-
-            if(radar) { 
-                radar.data.datasets[0].data = [s, a, v, 20, 20]; 
-                radar.update(); 
-            }
-        }
-
-        // PERSISTANCE DES DONNÉES
-        function saveData() {
-            const data = { 
-                age: document.getElementById('age').value, 
-                h: document.getElementById('height').value, 
-                w: document.getElementById('weight').value, 
-                img: document.getElementById('img-hud').src 
-            };
-            localStorage.setItem('gem_v18_final_storage', JSON.stringify(data)); 
-            document.getElementById('img-stats').src = data.img;
-            updateSystemStats();
-        }
-
-        function loadData() {
-            const d = JSON.parse(localStorage.getItem('gem_v18_final_storage'));
-            if(d) { 
-                document.getElementById('age').value = d.age;
-                document.getElementById('height').value = d.h; 
-                document.getElementById('weight').value = d.w; 
-                document.getElementById('img-hud').src = d.img; 
-                document.getElementById('img-stats').src = d.img;
-            }
-            updateSystemStats();
-        }
-
-        // IMAGE
-        function previewImage(i) {
-            const r = new FileReader(); 
-            r.onload = (e) => { 
-                document.getElementById('img-hud').src = e.target.result; 
-                document.getElementById('img-stats').src = e.target.result;
-                saveData(); 
-            };
-            r.readAsDataURL(i.files[0]);
-        }
-
-        // INITIALISATION RADAR
-        function initRadar() {
-            radar = new Chart(document.getElementById('radarChart'), {
-                type: 'radar',
-                data: { 
-                    labels: ['STR', 'AGI', 'VIT', 'INT', 'PER'], 
-                    datasets: [{ 
-                        data: [15,15,15,15,15], 
-                        backgroundColor: 'rgba(0, 229, 255, 0.2)', 
-                        borderColor: '#00e5ff', 
-                        borderWidth: 2,
-                        pointBackgroundColor: '#00e5ff'
-                    }] 
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        r: { 
-                            min: 0, max: 60, 
-                            ticks: { display: false }, 
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            angleLines: { color: 'rgba(255,255,255,0.1)' }
-                        } 
-                    }, 
-                    plugins: { legend: { display: false } } 
-                }
+        function initMissions(reveal) {
+            const container = document.getElementById('mission-container');
+            container.innerHTML = "";
+            const quests = [{t:"Push-ups", r:"30"}, {t:"Squats", r:"40"}, {t:"Plank", r:"1m"}];
+            quests.forEach((q) => {
+                const div = document.createElement('div');
+                div.className = reveal ? "mission-box active" : "mission-box";
+                div.innerHTML = `<strong>${reveal ? q.t : "???"}</strong><br><small>${reveal ? q.r+' Reps' : 'Locked'}</small>`;
+                div.onclick = () => { if(reveal && !isRecovering) completeQuest(div); };
+                container.appendChild(div);
             });
-            updateSystemStats();
+        }
+
+        function acceptMissions() {
+            initMissions(true);
+            document.getElementById('btn-accept').classList.add('hidden');
+            dailyTimer = setInterval(() => {
+                timeLeft--;
+                let h = Math.floor(timeLeft/3600), m = Math.floor((timeLeft%3600)/60), s = timeLeft%60;
+                document.getElementById('main-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        function completeQuest(el) {
+            if(el.classList.contains('completed')) return;
+            el.classList.add('completed');
+            completed++;
+            if(completed >= 3) {
+                alert("HUNTER v1 : Mission Accomplished.");
+                currentLvl++; save(); location.reload();
+            } else {
+                startRecovery();
+            }
+        }
+
+        function startRecovery() {
+            isRecovering = true;
+            let s = 30;
+            const widget = document.getElementById('rec-widget');
+            const boxes = document.querySelectorAll('.mission-box');
+            widget.classList.add('recovery-active');
+            boxes.forEach(b => { if(!b.classList.contains('completed')) b.classList.add('locked'); });
+            const itv = setInterval(() => {
+                s--;
+                document.getElementById('rec-timer').innerText = `00:${s < 10 ? '0'+s : s}`;
+                if(s <= 0) {
+                    clearInterval(itv);
+                    isRecovering = false;
+                    widget.classList.remove('recovery-active');
+                    boxes.forEach(b => b.classList.remove('locked'));
+                }
+            }, 1000);
         }
     </script>
 </body>
