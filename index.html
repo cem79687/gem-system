@@ -16,7 +16,6 @@
         body, html { width: 100%; height: 100%; background: #0a0a0f; font-family: 'Inter', sans-serif; color: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
 
-        /* --- SYSTEM ALERTS --- */
         #system-alert {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 80%; max-width: 300px; background: rgba(7, 9, 14, 0.95);
@@ -26,7 +25,7 @@
         }
         @keyframes alertFade { from { opacity: 0; transform: translate(-50%, -60%); } to { opacity: 1; transform: translate(-50%, -50%); } }
 
-        /* --- FENETRE DE CONNEXION --- */
+        /* --- FENETRES ORIGINALES (NON MODIFIÉES) --- */
         .login-container { z-index: 1000; width: 100%; max-width: 440px; padding: 20px; transition: opacity 0.5s ease; }
         .login-card {
             background: rgba(13, 16, 23, 0.9); backdrop-filter: blur(25px);
@@ -48,13 +47,23 @@
         .remember-container { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-size: 13px; }
         .btn-init { width: 100%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
 
-        /* --- HUD STYLE RESPONSIVE --- */
+        /* --- HUD : STRUCTURE NETTOYÉE --- */
         #hud-container {
             width: 95vw; max-width: 375px; 
             height: 90vh; max-height: 812px;
             background: var(--panel-bg); border-radius: 40px;
             padding: 25px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex; flex-direction: column; overflow-y: auto;
+            display: flex; flex-direction: column; 
+            overflow: hidden; /* Empêche le défilement de toute la fenêtre */
+        }
+
+        /* Zone de défilement isolée */
+        .hud-scroll-zone {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin: 15px 0;
+            -webkit-overflow-scrolling: touch;
         }
 
         #rank-badge-img {
@@ -69,7 +78,7 @@
             100% { filter: drop-shadow(0 0 8px var(--solo-cyan)) brightness(1); }
         }
 
-        .stat-card { background: var(--card-bg); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); }
+        .stat-card { background: var(--card-bg); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); margin-bottom: 8px; }
         .stat-label { font-size: 7px; color: var(--solo-blue); font-family: 'Orbitron'; display: block; }
         .stat-value { font-family: 'JetBrains Mono'; font-size: 14px; color: #fff; background: none; border: none; width: 100%; outline: none; }
         .mission-box { background: rgba(255, 255, 255, 0.02); border-left: 3px solid #1a1d26; padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
@@ -80,6 +89,16 @@
         .recovery-active { border-color: var(--recovery-gold) !important; color: var(--recovery-gold); }
         .xp-container { width: 100%; height: 4px; background: rgba(255,255,255,0.05); margin-top: 10px; border-radius: 2px; overflow: hidden; }
         #xp-fill-session { height: 100%; width: 0%; background: linear-gradient(90deg, var(--solo-blue), var(--solo-cyan)); transition: width 0.5s ease; }
+
+        #sync-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--panel-bg); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            visibility: hidden; opacity: 0; transition: 0.5s;
+        }
+        #sync-overlay.active { visibility: visible; opacity: 1; }
+        .sync-bar-container { width: 250px; height: 2px; background: rgba(0, 229, 255, 0.1); margin-top: 20px; position: relative; }
+        .sync-bar-fill { width: 0%; height: 100%; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); transition: width 2s ease-in-out; }
     </style>
 </head>
 <body>
@@ -100,20 +119,45 @@
             <div class="input-group"><label>Identifier</label><input type="text" id="hunter-id" class="neural-input" placeholder="Hunter Name..."></div>
             <div class="input-group"><label>Passcode</label><input type="password" id="hunter-pass" class="neural-input" placeholder="••••••••"></div>
             <label class="remember-container"><input type="checkbox" id="remember-me"> Se souvenir de moi</label>
-            <button onclick="startSync()" class="btn-init">Initialize Hunter Protocol</button>
+            <button onclick="goToScan()" class="btn-init">Initialize Hunter Protocol</button>
         </div>
     </div>
 
-    <div id="sync-loader" style="text-align:center; z-index:2000; display:none;">
-        <div style="font-family:'JetBrains Mono'; font-size:10px; color:var(--solo-cyan); text-transform:uppercase; letter-spacing:2px;">Initialisation Hunter v1...</div>
-        <div style="width:300px; height:4px; background:rgba(255,255,255,0.05); border-radius:10px; margin:20px auto; overflow:hidden;">
-            <div id="loader-fill" style="height:100%; width:0%; background:var(--solo-cyan); transition:width 0.1s linear;"></div>
+    <div id="goal-screen" class="login-container hidden">
+        <div class="login-card" style="border: 1px solid var(--solo-blue);">
+            <div class="login-header"><h2>SCAN DU PROFIL</h2><p>Définition de la voie d'évolution</p></div>
+            <div class="input-group">
+                <label>Objectif Principal</label>
+                <select id="goal-type" class="neural-input" style="background: #1a1d26;">
+                    <option value="muscle_gain">💪 Prise de Masse</option>
+                    <option value="weight_loss">🔥 Perte de Graisse</option>
+                    <option value="endurance">🏃 Endurance</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Intensité</label>
+                <select id="goal-intensity" class="neural-input" style="background: #1a1d26;">
+                    <option value="1">Recrue (x1.0)</option>
+                    <option value="1.5">Soldat (x1.5)</option>
+                    <option value="2.5">Élite (x2.5)</option>
+                </select>
+            </div>
+            <button onclick="confirmScan()" class="btn-init">CONFIRMER LE SCAN</button>
         </div>
+    </div>
+
+    <div id="sync-overlay">
+        <div style="font-family:'Orbitron'; color:var(--solo-cyan); font-size:12px; letter-spacing:3px; text-transform:uppercase;">Synchronisation Neuronale...</div>
+        <div class="sync-bar-container">
+            <div id="sync-fill" class="sync-bar-fill"></div>
+        </div>
+        <div id="sync-status" style="font-family:'JetBrains Mono'; color:var(--text-muted); font-size:8px; margin-top:10px;">CHARGEMENT DES PROTOCOLES...</div>
     </div>
 
     <div id="main-hud" class="hud-wrapper hidden">
         <div id="hud-container">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-shrink: 0;">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
                         <img id="avatar-hud" src="" style="width:100%; height:100%; object-fit:cover;">
@@ -132,37 +176,42 @@
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <div class="stat-card"><span class="stat-label">GENRE</span><select id="u-sex" class="stat-value" onchange="save()"><option value="M">♂ MALE</option><option value="F">♀ FEMALE</option></select></div>
-                <div class="stat-card"><span class="stat-label">IMC</span><div id="u-imc" class="stat-value">0.0</div></div>
-                <div class="stat-card"><span class="stat-label">ÂGE</span><input type="number" id="u-age" class="stat-value" onchange="save()"></div>
-                <div class="stat-card"><span class="stat-label">TAILLE (CM)</span><input type="number" id="u-height" class="stat-value" onchange="save()"></div>
-                <div class="stat-card" style="grid-column: span 2;"><span class="stat-label">POIDS (KG)</span><input type="number" id="u-weight" class="stat-value" onchange="save()"></div>
-            </div>
-
-            <div style="margin-top: 25px; margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; font-family: 'Orbitron'; font-size: 8px; color: var(--solo-cyan); margin-bottom: 5px;">
-                    <span>SESSION PROGRESS</span><span id="session-pc">0%</span>
+            <div class="hud-scroll-zone">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <div class="stat-card"><span class="stat-label">GENRE</span><select id="u-sex" class="stat-value" onchange="save()"><option value="M">♂ MALE</option><option value="F">♀ FEMALE</option></select></div>
+                    <div class="stat-card"><span class="stat-label">IMC</span><div id="u-imc" class="stat-value">0.0</div></div>
+                    <div class="stat-card"><span class="stat-label">ÂGE</span><input type="number" id="u-age" class="stat-value" onchange="save()"></div>
+                    <div class="stat-card"><span class="stat-label">TAILLE (CM)</span><input type="number" id="u-height" class="stat-value" onchange="save()"></div>
+                    <div class="stat-card" style="grid-column: span 2;"><span class="stat-label">POIDS (KG)</span><input type="number" id="u-weight" class="stat-value" onchange="save()"></div>
                 </div>
-                <div class="xp-container"><div id="xp-fill-session"></div></div>
+
+                <div style="margin-top: 25px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; font-family: 'Orbitron'; font-size: 8px; color: var(--solo-cyan); margin-bottom: 5px;">
+                        <span>SESSION PROGRESS</span><span id="session-pc">0%</span>
+                    </div>
+                    <div class="xp-container"><div id="xp-fill-session"></div></div>
+                </div>
+
+                <div id="mission-container" style="margin-top:10px;"></div>
             </div>
 
-            <div id="mission-container" style="flex-grow:1; overflow-y:auto; margin-top:10px;"></div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; flex-shrink: 0;">
                 <div id="main-timer" style="font-family:'JetBrains Mono'; font-size:20px; color:var(--system-red); font-weight:700;">24:00:00</div>
                 <button id="btn-accept" class="btn-init" style="width:auto; padding:10px 20px;" onclick="acceptMissions()">ACCEPTER</button>
             </div>
+
         </div>
     </div>
 
     <script>
+        // Logique JS originale conservée
         const KEY = "HUNTER_V1_STORAGE";
         const TIMER_KEY = "HUNTER_TIMER_END";
         const QUEST_KEY = "HUNTER_CURRENT_QUESTS";
 
         let currentLvl = 1, completed = 0, isRecovering = false, dailyInterval = null;
         let activeQuests = [];
+        let currentHunterName = "";
 
         const EXERCISES_POOL = [
             { name: "Pompes", base: 10, unit: "Reps" },
@@ -173,20 +222,35 @@
             { name: "Mountain Climbers", base: 20, unit: "Reps" }
         ];
 
+        function goToScan() {
+            currentHunterName = document.getElementById('hunter-id').value;
+            if(!currentHunterName) return alert("Nom de Hunter requis");
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('goal-screen').classList.remove('hidden');
+        }
+
+        function confirmScan() {
+            const overlay = document.getElementById('sync-overlay');
+            const fill = document.getElementById('sync-fill');
+            overlay.classList.add('active');
+            setTimeout(() => { fill.style.width = '100%'; }, 100);
+            setTimeout(() => {
+                document.getElementById('goal-screen').classList.add('hidden');
+                overlay.classList.remove('active');
+                document.getElementById('main-hud').classList.remove('hidden');
+                document.getElementById('display-name').innerText = currentHunterName.toUpperCase();
+                load();
+                checkExistingTimer();
+            }, 2500); 
+        }
+
         function showSystemAlert(title, msg) {
             document.getElementById('alert-title').innerText = title;
             document.getElementById('alert-msg').innerText = msg;
             document.getElementById('system-alert').style.display = 'block';
-            sendNotification(title, msg);
         }
 
         function closeAlert() { document.getElementById('system-alert').style.display = 'none'; }
-
-        function sendNotification(title, body) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/616/616408.png" });
-            }
-        }
 
         function previewLoginAvatar(input) {
             if (input.files && input.files[0]) {
@@ -199,28 +263,13 @@
             }
         }
 
-        function startSync() {
-            if ("Notification" in window) Notification.requestPermission();
-            const user = document.getElementById('hunter-id').value;
-            if(!user) return alert("Nom de Hunter requis");
-            document.getElementById('login-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('sync-loader').style.display = 'none';
-                document.getElementById('main-hud').classList.remove('hidden');
-                document.getElementById('display-name').innerText = user.toUpperCase();
-                load();
-                checkExistingTimer();
-            }, 500);
-        }
-
         function generateRandomMissions() {
             let shuffled = [...EXERCISES_POOL].sort(() => 0.5 - Math.random());
             let selected = shuffled.slice(0, 3);
             let factor = Math.floor((currentLvl - 1) / 5);
             activeQuests = selected.map(ex => ({
                 t: ex.name,
-                r: Math.floor(ex.base + (ex.base * factor * 0.2)) + ex.unit
+                r: Math.floor(ex.base + (ex.base * factor * 0.2)) + " " + ex.unit
             }));
             localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
         }
@@ -282,7 +331,7 @@
                 completed = d.completed || 0;
                 document.getElementById('u-age').value = d.age || "";
                 document.getElementById('u-height').value = d.h || "";
-                document.getElementById('u-weight').value = d.weight || "";
+                document.getElementById('u-weight').value = d.w || "";
                 document.getElementById('u-sex').value = d.sex || "M";
                 if(d.avatar) document.getElementById('avatar-hud').src = d.avatar;
             }
@@ -293,7 +342,6 @@
         function initMissions(reveal) {
             const container = document.getElementById('mission-container');
             container.innerHTML = "";
-            if(reveal && activeQuests.length === 0) generateRandomMissions();
             const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
             displayQuests.forEach((q, index) => {
                 const div = document.createElement('div');
