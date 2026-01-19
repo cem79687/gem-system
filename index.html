@@ -16,14 +16,23 @@
         body, html { width: 100%; height: 100%; background: #0a0a0f; font-family: 'Inter', sans-serif; color: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
 
-        /* --- FENETRE DE CONNEXION (Hunter v1 Edition) --- */
+        /* --- SYSTEM ALERTS --- */
+        #system-alert {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; max-width: 300px; background: rgba(7, 9, 14, 0.95);
+            border: 2px solid var(--solo-cyan); border-radius: 15px; padding: 20px;
+            z-index: 5000; text-align: center; box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+            display: none; animation: alertFade 0.3s ease;
+        }
+        @keyframes alertFade { from { opacity: 0; transform: translate(-50%, -60%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+        /* --- FENETRE DE CONNEXION --- */
         .login-container { z-index: 1000; width: 100%; max-width: 440px; padding: 20px; transition: opacity 0.5s ease; }
         .login-card {
             background: rgba(13, 16, 23, 0.9); backdrop-filter: blur(25px);
             padding: 50px 40px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.08);
             text-align: center; position: relative; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
         }
-        
         .ai-logo-selector { 
             width: 70px; height: 70px; background: rgba(59, 130, 246, 0.1); 
             border-radius: 20px; display: flex; align-items: center; justify-content: center; 
@@ -31,55 +40,55 @@
             cursor: pointer; overflow: hidden; position: relative;
         }
         .ai-logo-selector img { width: 100%; height: 100%; object-fit: cover; }
-
         .login-header h2 { font-family: 'Orbitron'; font-size: 1.7rem; margin-bottom: 10px; letter-spacing: 1px; }
         .login-header p { color: var(--text-muted); font-size: 14px; margin-bottom: 40px; }
-        
         .input-group { text-align: left; margin-bottom: 25px; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .neural-input { width: 100%; background: rgba(15, 17, 26, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 14px; color: #fff; outline: none; transition: 0.3s; }
-        
         .remember-container { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-size: 13px; }
-
         .btn-init { width: 100%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
-        .btn-init:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); }
 
-        /* --- SYNC LOADER --- */
-        #sync-loader { text-align: center; z-index: 2000; display: none; }
-        .loader-bar-container { width: 300px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 20px auto; overflow: hidden; position: relative; }
-        .loader-fill { height: 100%; width: 0%; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); transition: width 0.1s linear; }
-        .sync-text { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--solo-cyan); text-transform: uppercase; letter-spacing: 2px; }
-
-        /* --- HUD ORIGINAL --- */
-        .hud-wrapper { position: relative; display: flex; align-items: center; z-index: 100; animation: hudPop 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-        @keyframes hudPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        
+        /* --- HUD STYLE RESPONSIVE --- */
         #hud-container {
-            width: 375px; height: 812px; background: var(--panel-bg); border-radius: 40px;
+            width: 95vw; max-width: 375px; 
+            height: 90vh; max-height: 812px;
+            background: var(--panel-bg); border-radius: 40px;
             padding: 25px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; overflow-y: auto;
         }
 
-        .system-side-btn {
-            position: absolute; right: -30px; top: 50%; transform: translateY(-50%);
-            background: var(--solo-blue); color: white; padding: 20px 5px; border-radius: 0 8px 8px 0;
-            font-family: 'Orbitron'; font-size: 10px; font-weight: 900; writing-mode: vertical-rl;
-            text-orientation: uppercase; cursor: pointer; border: 1px solid var(--solo-cyan); border-left: none;
+        #rank-badge-img {
+            height: 70px; margin-top: 2px; display: block; object-fit: contain; 
+            filter: drop-shadow(0 0 10px var(--solo-cyan));
+            animation: badgePulse 3s infinite ease-in-out;
+        }
+
+        @keyframes badgePulse {
+            0% { filter: drop-shadow(0 0 8px var(--solo-cyan)) brightness(1); }
+            50% { filter: drop-shadow(0 0 15px var(--solo-cyan)) brightness(1.2); }
+            100% { filter: drop-shadow(0 0 8px var(--solo-cyan)) brightness(1); }
         }
 
         .stat-card { background: var(--card-bg); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); }
         .stat-label { font-size: 7px; color: var(--solo-blue); font-family: 'Orbitron'; display: block; }
         .stat-value { font-family: 'JetBrains Mono'; font-size: 14px; color: #fff; background: none; border: none; width: 100%; outline: none; }
-        
         .mission-box { background: rgba(255, 255, 255, 0.02); border-left: 3px solid #1a1d26; padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
         .mission-box.active { border-left-color: var(--solo-cyan); background: rgba(0, 229, 255, 0.03); }
         .mission-box.completed { border-left-color: var(--system-green); opacity: 0.4; }
-
+        .mission-box.locked { opacity: 0.3; pointer-events: none; }
         .recovery-widget { border: 1.5px solid #333; padding: 5px; border-radius: 4px; text-align: center; min-width: 80px; }
         .recovery-active { border-color: var(--recovery-gold) !important; color: var(--recovery-gold); }
+        .xp-container { width: 100%; height: 4px; background: rgba(255,255,255,0.05); margin-top: 10px; border-radius: 2px; overflow: hidden; }
+        #xp-fill-session { height: 100%; width: 0%; background: linear-gradient(90deg, var(--solo-blue), var(--solo-cyan)); transition: width 0.5s ease; }
     </style>
 </head>
 <body>
+
+    <div id="system-alert">
+        <div id="alert-title" style="font-family:'Orbitron'; color:var(--solo-cyan); font-size:14px; margin-bottom:10px;">[ ALERTE SYSTÈME ]</div>
+        <div id="alert-msg" style="font-size:12px; margin-bottom:15px;">Message ici</div>
+        <button onclick="closeAlert()" class="btn-init" style="padding:8px; font-size:10px;">OK</button>
+    </div>
 
     <div id="login-screen" class="login-container">
         <div class="login-card">
@@ -87,36 +96,18 @@
                 <img id="login-preview" src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
             </div>
             <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="previewLoginAvatar(this)">
-            
-            <div class="login-header">
-                <h2>Neural Access</h2>
-                <p>Hunter v1 Professional Suite</p>
-            </div>
-            
-            <div class="input-group">
-                <label>Identifier</label>
-                <input type="text" id="hunter-id" class="neural-input" placeholder="Hunter Name...">
-            </div>
-            
-            <div class="input-group">
-                <label>Passcode</label>
-                <input type="password" id="hunter-pass" class="neural-input" placeholder="••••••••">
-            </div>
-
-            <label class="remember-container">
-                <input type="checkbox" id="remember-me"> Se souvenir de moi
-            </label>
-            
+            <div class="login-header"><h2>Neural Access</h2><p>Hunter v1 Professional Suite</p></div>
+            <div class="input-group"><label>Identifier</label><input type="text" id="hunter-id" class="neural-input" placeholder="Hunter Name..."></div>
+            <div class="input-group"><label>Passcode</label><input type="password" id="hunter-pass" class="neural-input" placeholder="••••••••"></div>
+            <label class="remember-container"><input type="checkbox" id="remember-me"> Se souvenir de moi</label>
             <button onclick="startSync()" class="btn-init">Initialize Hunter Protocol</button>
-            
-            <div style="margin: 25px 0; font-size: 9px; color: #333; letter-spacing: 3px; font-weight: 800;">SYSTÈME HUNTER V1.0</div>
         </div>
     </div>
 
-    <div id="sync-loader">
-        <div class="sync-text" id="sync-status">Initialisation Hunter v1...</div>
-        <div class="loader-bar-container">
-            <div id="loader-fill" class="loader-fill"></div>
+    <div id="sync-loader" style="text-align:center; z-index:2000; display:none;">
+        <div style="font-family:'JetBrains Mono'; font-size:10px; color:var(--solo-cyan); text-transform:uppercase; letter-spacing:2px;">Initialisation Hunter v1...</div>
+        <div style="width:300px; height:4px; background:rgba(255,255,255,0.05); border-radius:10px; margin:20px auto; overflow:hidden;">
+            <div id="loader-fill" style="height:100%; width:0%; background:var(--solo-cyan); transition:width 0.1s linear;"></div>
         </div>
     </div>
 
@@ -127,9 +118,9 @@
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
                         <img id="avatar-hud" src="" style="width:100%; height:100%; object-fit:cover;">
                     </div>
-                    <div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-start; margin-top: 12px;">
                         <div id="display-name" style="font-family:'Orbitron'; font-size:18px; font-weight:900;">HUNTER</div>
-                        <div style="color:var(--system-red); font-family:'Orbitron'; font-size:10px; border:1px solid var(--system-red); padding:2px 5px; display:inline-block; margin-top:5px;">RANG E</div>
+                        <img id="rank-badge-img" src="rang/rangE.png">
                     </div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center;">
@@ -149,19 +140,53 @@
                 <div class="stat-card" style="grid-column: span 2;"><span class="stat-label">POIDS (KG)</span><input type="number" id="u-weight" class="stat-value" onchange="save()"></div>
             </div>
 
-            <div id="mission-container" style="flex-grow:1; margin-top:20px; overflow-y:auto;"></div>
+            <div style="margin-top: 25px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; font-family: 'Orbitron'; font-size: 8px; color: var(--solo-cyan); margin-bottom: 5px;">
+                    <span>SESSION PROGRESS</span><span id="session-pc">0%</span>
+                </div>
+                <div class="xp-container"><div id="xp-fill-session"></div></div>
+            </div>
+
+            <div id="mission-container" style="flex-grow:1; overflow-y:auto; margin-top:10px;"></div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                 <div id="main-timer" style="font-family:'JetBrains Mono'; font-size:20px; color:var(--system-red); font-weight:700;">24:00:00</div>
                 <button id="btn-accept" class="btn-init" style="width:auto; padding:10px 20px;" onclick="acceptMissions()">ACCEPTER</button>
             </div>
         </div>
-        <div class="system-side-btn">SYSTEM</div>
     </div>
 
     <script>
         const KEY = "HUNTER_V1_STORAGE";
-        let currentLvl = 1, completed = 0, isRecovering = false, dailyTimer = null, timeLeft = 86400;
+        const TIMER_KEY = "HUNTER_TIMER_END";
+        const QUEST_KEY = "HUNTER_CURRENT_QUESTS";
+
+        let currentLvl = 1, completed = 0, isRecovering = false, dailyInterval = null;
+        let activeQuests = [];
+
+        const EXERCISES_POOL = [
+            { name: "Pompes", base: 10, unit: "Reps" },
+            { name: "Squats", base: 15, unit: "Reps" },
+            { name: "Gainage", base: 30, unit: "s" },
+            { name: "Fentes", base: 10, unit: "Reps/j" },
+            { name: "Dips", base: 8, unit: "Reps" },
+            { name: "Mountain Climbers", base: 20, unit: "Reps" }
+        ];
+
+        function showSystemAlert(title, msg) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-msg').innerText = msg;
+            document.getElementById('system-alert').style.display = 'block';
+            sendNotification(title, msg);
+        }
+
+        function closeAlert() { document.getElementById('system-alert').style.display = 'none'; }
+
+        function sendNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/616/616408.png" });
+            }
+        }
 
         function previewLoginAvatar(input) {
             if (input.files && input.files[0]) {
@@ -175,92 +200,138 @@
         }
 
         function startSync() {
+            if ("Notification" in window) Notification.requestPermission();
             const user = document.getElementById('hunter-id').value;
             if(!user) return alert("Nom de Hunter requis");
             document.getElementById('login-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('sync-loader').style.display = 'block';
-                let progress = 0;
-                const fill = document.getElementById('loader-fill');
-                const status = document.getElementById('sync-status');
-                const messages = ["Link Start...", "DNA Syncing...", "HUD Rendering...", "Access Granted"];
-                const interval = setInterval(() => {
-                    progress += 4;
-                    fill.style.width = progress + '%';
-                    if(progress % 25 === 0) status.innerText = messages[Math.floor(progress/26)];
-                    if(progress >= 100) {
-                        clearInterval(interval);
-                        document.getElementById('sync-loader').classList.add('hidden');
-                        document.getElementById('main-hud').classList.remove('hidden');
-                        document.getElementById('display-name').innerText = user.toUpperCase();
-                        load();
-                    }
-                }, 40);
+                document.getElementById('sync-loader').style.display = 'none';
+                document.getElementById('main-hud').classList.remove('hidden');
+                document.getElementById('display-name').innerText = user.toUpperCase();
+                load();
+                checkExistingTimer();
             }, 500);
+        }
+
+        function generateRandomMissions() {
+            let shuffled = [...EXERCISES_POOL].sort(() => 0.5 - Math.random());
+            let selected = shuffled.slice(0, 3);
+            let factor = Math.floor((currentLvl - 1) / 5);
+            activeQuests = selected.map(ex => ({
+                t: ex.name,
+                r: Math.floor(ex.base + (ex.base * factor * 0.2)) + ex.unit
+            }));
+            localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
+        }
+
+        function startDailyTimer(durationInput) {
+            let endTime = durationInput ? Date.now() + (durationInput * 1000) : parseInt(localStorage.getItem(TIMER_KEY));
+            if(durationInput) localStorage.setItem(TIMER_KEY, endTime);
+            if(dailyInterval) clearInterval(dailyInterval);
+            dailyInterval = setInterval(() => {
+                let remaining = Math.floor((endTime - Date.now()) / 1000);
+                if (remaining <= 0) {
+                    clearInterval(dailyInterval);
+                    localStorage.removeItem(TIMER_KEY);
+                    localStorage.removeItem(QUEST_KEY);
+                    document.getElementById('main-timer').innerText = "24:00:00";
+                    return;
+                }
+                let h = Math.floor(remaining / 3600), m = Math.floor((remaining % 3600) / 60), s = remaining % 60;
+                document.getElementById('main-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        function checkExistingTimer() {
+            const savedEnd = localStorage.getItem(TIMER_KEY);
+            if (savedEnd) {
+                const remaining = Math.floor((parseInt(savedEnd) - Date.now()) / 1000);
+                if (remaining > 0) {
+                    startDailyTimer();
+                    const savedQuests = localStorage.getItem(QUEST_KEY);
+                    if(savedQuests) activeQuests = JSON.parse(savedQuests);
+                    initMissions(true);
+                    document.getElementById('btn-accept').classList.add('hidden');
+                }
+            }
+        }
+
+        function updateRankVisuals() {
+            const badge = document.getElementById('rank-badge-img');
+            let file = (currentLvl >= 10) ? "rangD.png" : "rangE.png";
+            if(badge) badge.src = "rang/" + file;
+            let pc = Math.round((completed / 3) * 100);
+            document.getElementById('xp-fill-session').style.width = pc + "%";
+            document.getElementById('session-pc').innerText = pc + "%";
         }
 
         function save() {
             const h = parseFloat(document.getElementById('u-height').value) || 0;
             const w = parseFloat(document.getElementById('u-weight').value) || 0;
-            const imcEl = document.getElementById('u-imc');
-            if(h > 0) {
-                const imc = (w / ((h/100)**2)).toFixed(1);
-                imcEl.innerText = imc;
-                imcEl.style.color = (imc >= 18.5 && imc <= 25) ? "#00ff88" : "#ff3d3d";
-            }
-            const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, remember: document.getElementById('remember-me').checked };
+            if(h > 0) document.getElementById('u-imc').innerText = (w / ((h/100)**2)).toFixed(1);
+            const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
             localStorage.setItem(KEY, JSON.stringify(data));
+            updateRankVisuals();
         }
 
         function load() {
             const d = JSON.parse(localStorage.getItem(KEY));
             if(d) {
                 currentLvl = d.lvl || 1;
+                completed = d.completed || 0;
                 document.getElementById('u-age').value = d.age || "";
                 document.getElementById('u-height').value = d.h || "";
-                document.getElementById('u-weight').value = d.w || "";
+                document.getElementById('u-weight').value = d.weight || "";
                 document.getElementById('u-sex').value = d.sex || "M";
-                document.getElementById('remember-me').checked = d.remember || false;
-                if(d.avatar) {
-                    document.getElementById('avatar-hud').src = d.avatar;
-                    document.getElementById('login-preview').src = d.avatar;
-                }
-                save();
+                if(d.avatar) document.getElementById('avatar-hud').src = d.avatar;
             }
-            initMissions(false);
+            initMissions(localStorage.getItem(TIMER_KEY) ? true : false);
+            updateRankVisuals();
         }
 
         function initMissions(reveal) {
             const container = document.getElementById('mission-container');
             container.innerHTML = "";
-            const quests = [{t:"Push-ups", r:"30"}, {t:"Squats", r:"40"}, {t:"Plank", r:"1m"}];
-            quests.forEach((q) => {
+            if(reveal && activeQuests.length === 0) generateRandomMissions();
+            const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
+            displayQuests.forEach((q, index) => {
                 const div = document.createElement('div');
                 div.className = reveal ? "mission-box active" : "mission-box";
-                div.innerHTML = `<strong>${reveal ? q.t : "???"}</strong><br><small>${reveal ? q.r+' Reps' : 'Locked'}</small>`;
+                if(reveal && index < completed) div.classList.add('completed');
+                div.innerHTML = `<strong>${q.t}</strong><br><small>${reveal ? q.r : 'Locked'}</small>`;
                 div.onclick = () => { if(reveal && !isRecovering) completeQuest(div); };
                 container.appendChild(div);
             });
         }
 
         function acceptMissions() {
+            generateRandomMissions();
             initMissions(true);
             document.getElementById('btn-accept').classList.add('hidden');
-            dailyTimer = setInterval(() => {
-                timeLeft--;
-                let h = Math.floor(timeLeft/3600), m = Math.floor((timeLeft%3600)/60), s = timeLeft%60;
-                document.getElementById('main-timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            }, 1000);
+            startDailyTimer(86400);
+            showSystemAlert("[ SYSTÈME ]", "Quête acceptée. Le décompte de 24h a commencé.");
         }
 
         function completeQuest(el) {
             if(el.classList.contains('completed')) return;
             el.classList.add('completed');
             completed++;
+            save();
+            updateRankVisuals();
             if(completed >= 3) {
-                alert("HUNTER v1 : Mission Accomplished.");
-                currentLvl++; save(); location.reload();
+                setTimeout(() => {
+                    currentLvl++; completed = 0; 
+                    activeQuests = [];
+                    localStorage.removeItem(QUEST_KEY);
+                    localStorage.removeItem(TIMER_KEY);
+                    save(); 
+                    showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Vous avez atteint le Niveau " + currentLvl + " !");
+                    document.getElementById('btn-accept').classList.remove('hidden');
+                    initMissions(false);
+                    clearInterval(dailyInterval);
+                    document.getElementById('main-timer').innerText = "24:00:00";
+                }, 500);
             } else {
                 startRecovery();
             }
@@ -270,17 +341,14 @@
             isRecovering = true;
             let s = 30;
             const widget = document.getElementById('rec-widget');
-            const boxes = document.querySelectorAll('.mission-box');
             widget.classList.add('recovery-active');
-            boxes.forEach(b => { if(!b.classList.contains('completed')) b.classList.add('locked'); });
             const itv = setInterval(() => {
                 s--;
                 document.getElementById('rec-timer').innerText = `00:${s < 10 ? '0'+s : s}`;
                 if(s <= 0) {
-                    clearInterval(itv);
-                    isRecovering = false;
+                    clearInterval(itv); isRecovering = false;
                     widget.classList.remove('recovery-active');
-                    boxes.forEach(b => b.classList.remove('locked'));
+                    document.getElementById('rec-timer').innerText = "00:00";
                 }
             }, 1000);
         }
