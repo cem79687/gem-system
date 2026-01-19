@@ -25,7 +25,6 @@
         }
         @keyframes alertFade { from { opacity: 0; transform: translate(-50%, -60%); } to { opacity: 1; transform: translate(-50%, -50%); } }
 
-        /* --- FENETRES ORIGINALES --- */
         .login-container { z-index: 1000; width: 100%; max-width: 440px; padding: 20px; transition: opacity 0.5s ease; }
         .login-card {
             background: rgba(13, 16, 23, 0.9); backdrop-filter: blur(25px);
@@ -47,7 +46,6 @@
         .remember-container { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-size: 13px; }
         .btn-init { width: 100%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
 
-        /* --- HUD : STRUCTURE CORRIGÉE --- */
         #hud-container {
             width: 95vw; max-width: 375px; 
             height: 90vh; max-height: 812px;
@@ -57,7 +55,6 @@
             overflow: hidden; 
         }
 
-        /* Correction du bouton pour PC */
         #btn-accept {
             position: relative;
             z-index: 999;
@@ -66,7 +63,10 @@
         }
 
         .hud-scroll-zone {
-            flex-grow: 1; overflow-y: auto; padding-right: 5px; margin: 15px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin: 15px 0;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -158,7 +158,6 @@
 
     <div id="main-hud" class="hud-wrapper hidden">
         <div id="hud-container">
-            
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-shrink: 0;">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
@@ -201,26 +200,18 @@
                 <div id="main-timer" style="font-family:'JetBrains Mono'; font-size:20px; color:var(--system-red); font-weight:700;">24:00:00</div>
                 <button id="btn-accept" class="btn-init" style="width:auto; padding:10px 20px;" onclick="acceptMissions()">ACCEPTER</button>
             </div>
-
         </div>
     </div>
 
     <script>
-        const KEY = "HUNTER_V1_STORAGE";
-        const TIMER_KEY = "HUNTER_TIMER_END";
-        const QUEST_KEY = "HUNTER_CURRENT_QUESTS";
-
+        const KEY = "HUNTER_V1_STORAGE", TIMER_KEY = "HUNTER_TIMER_END", QUEST_KEY = "HUNTER_CURRENT_QUESTS";
         let currentLvl = 1, completed = 0, isRecovering = false, dailyInterval = null;
-        let activeQuests = [];
-        let currentHunterName = "";
+        let activeQuests = [], currentHunterName = "";
 
         const EXERCISES_POOL = [
-            { name: "Pompes", base: 10, unit: "Reps" },
-            { name: "Squats", base: 15, unit: "Reps" },
-            { name: "Gainage", base: 30, unit: "s" },
-            { name: "Fentes", base: 10, unit: "Reps/j" },
-            { name: "Dips", base: 8, unit: "Reps" },
-            { name: "Mountain Climbers", base: 20, unit: "Reps" }
+            { name: "Pompes", base: 10, unit: "Reps" }, { name: "Squats", base: 15, unit: "Reps" },
+            { name: "Gainage", base: 30, unit: "s" }, { name: "Fentes", base: 10, unit: "Reps/j" },
+            { name: "Dips", base: 8, unit: "Reps" }, { name: "Mountain Climbers", base: 20, unit: "Reps" }
         ];
 
         function goToScan() {
@@ -232,9 +223,8 @@
 
         function confirmScan() {
             const overlay = document.getElementById('sync-overlay');
-            const fill = document.getElementById('sync-fill');
             overlay.classList.add('active');
-            setTimeout(() => { fill.style.width = '100%'; }, 100);
+            setTimeout(() => { document.getElementById('sync-fill').style.width = '100%'; }, 100);
             setTimeout(() => {
                 document.getElementById('goal-screen').classList.add('hidden');
                 overlay.classList.remove('active');
@@ -264,15 +254,22 @@
             }
         }
 
+        /* --- CORRECTIF : GESTION DU QUOTA EXCEDÉ --- */
         function generateRandomMissions() {
             let shuffled = [...EXERCISES_POOL].sort(() => 0.5 - Math.random());
-            let selected = shuffled.slice(0, 3);
             let factor = Math.floor((currentLvl - 1) / 5);
-            activeQuests = selected.map(ex => ({
-                t: ex.name,
-                r: Math.floor(ex.base + (ex.base * factor * 0.2)) + " " + ex.unit
+            activeQuests = shuffled.slice(0, 3).map(ex => ({
+                t: ex.name, r: Math.floor(ex.base + (ex.base * factor * 0.2)) + " " + ex.unit
             }));
-            localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
+            
+            try {
+                localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
+            } catch (e) {
+                console.warn("Quota dépassé, tentative de purge...");
+                localStorage.clear(); // Nettoie le stockage pour libérer de la place
+                localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
+                save(); 
+            }
         }
 
         function startDailyTimer(durationInput) {
@@ -295,124 +292,105 @@
             }, 1000);
         }
 
-        /* --- CORRECTION LOGIQUE CHARGEMENT --- */
         function load() {
             const d = JSON.parse(localStorage.getItem(KEY));
             if(d) {
-                currentLvl = d.lvl || 1;
-                completed = d.completed || 0;
+                currentLvl = d.lvl || 1; completed = d.completed || 0;
                 document.getElementById('u-age').value = d.age || "";
                 document.getElementById('u-height').value = d.h || "";
                 document.getElementById('u-weight').value = d.w || "";
                 document.getElementById('u-sex').value = d.sex || "M";
                 if(d.avatar) document.getElementById('avatar-hud').src = d.avatar;
             }
-            
             const savedEnd = localStorage.getItem(TIMER_KEY);
-            const hasActiveTimer = savedEnd && (parseInt(savedEnd) > Date.now());
-            
-            initMissions(hasActiveTimer);
+            initMissions(savedEnd && (parseInt(savedEnd) > Date.now()));
             updateRankVisuals();
         }
 
         function checkExistingTimer() {
             const savedEnd = localStorage.getItem(TIMER_KEY);
-            if (savedEnd) {
-                const remaining = Math.floor((parseInt(savedEnd) - Date.now()) / 1000);
-                if (remaining > 0) {
-                    startDailyTimer();
-                    const savedQuests = localStorage.getItem(QUEST_KEY);
-                    if(savedQuests) activeQuests = JSON.parse(savedQuests);
-                    initMissions(true);
-                    document.getElementById('btn-accept').classList.add('hidden');
-                } else {
-                    localStorage.removeItem(TIMER_KEY);
-                    localStorage.removeItem(QUEST_KEY);
-                    document.getElementById('btn-accept').classList.remove('hidden');
-                    initMissions(false);
-                    document.getElementById('main-timer').innerText = "24:00:00";
-                }
+            if (savedEnd && parseInt(savedEnd) > Date.now()) {
+                startDailyTimer();
+                const sq = localStorage.getItem(QUEST_KEY);
+                if(sq) activeQuests = JSON.parse(sq);
+                initMissions(true);
+                document.getElementById('btn-accept').classList.add('hidden');
+            } else {
+                localStorage.removeItem(TIMER_KEY); localStorage.removeItem(QUEST_KEY);
+                document.getElementById('btn-accept').classList.remove('hidden');
+                initMissions(false);
+                document.getElementById('main-timer').innerText = "24:00:00";
             }
         }
-        /* --- FIN CORRECTION --- */
 
         function updateRankVisuals() {
             const badge = document.getElementById('rank-badge-img');
-            let file = (currentLvl >= 10) ? "rangD.png" : "rangE.png";
-            if(badge) badge.src = "rang/" + file;
+            if(badge) badge.src = "rang/rang" + (currentLvl >= 10 ? "D" : "E") + ".png";
             let pc = Math.round((completed / 3) * 100);
             document.getElementById('xp-fill-session').style.width = pc + "%";
             document.getElementById('session-pc').innerText = pc + "%";
         }
 
         function save() {
-            const h = parseFloat(document.getElementById('u-height').value) || 0;
-            const w = parseFloat(document.getElementById('u-weight').value) || 0;
+            const h = parseFloat(document.getElementById('u-height').value) || 0, w = parseFloat(document.getElementById('u-weight').value) || 0;
             if(h > 0) document.getElementById('u-imc').innerText = (w / ((h/100)**2)).toFixed(1);
-            const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
-            localStorage.setItem(KEY, JSON.stringify(data));
+            try {
+                localStorage.setItem(KEY, JSON.stringify({ lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed }));
+            } catch(e) { console.error("Sauvegarde impossible : stockage plein."); }
             updateRankVisuals();
         }
 
         function initMissions(reveal) {
             const container = document.getElementById('mission-container');
             container.innerHTML = "";
-            const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
-            displayQuests.forEach((q, index) => {
+            const dq = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
+            dq.forEach((q, i) => {
                 const div = document.createElement('div');
                 div.className = reveal ? "mission-box active" : "mission-box";
-                if(reveal && index < completed) div.classList.add('completed');
+                if(reveal && i < completed) div.classList.add('completed');
                 div.innerHTML = `<strong>${q.t}</strong><br><small>${reveal ? q.r : 'Locked'}</small>`;
                 div.onclick = () => { if(reveal && !isRecovering) completeQuest(div); };
                 container.appendChild(div);
             });
         }
 
+        /* --- CORRECTIF : BOUTON ACCEPTER --- */
         function acceptMissions() {
-            generateRandomMissions();
-            initMissions(true);
-            document.getElementById('btn-accept').classList.add('hidden');
-            startDailyTimer(86400);
-            showSystemAlert("[ SYSTÈME ]", "Quête acceptée. Le décompte de 24h a commencé.");
+            try {
+                generateRandomMissions();
+                initMissions(true);
+                document.getElementById('btn-accept').classList.add('hidden');
+                startDailyTimer(86400);
+                showSystemAlert("[ SYSTÈME ]", "Quête acceptée. Le décompte de 24h a commencé.");
+            } catch(err) {
+                alert("Erreur critique de stockage détectée. Réinitialisation du cache...");
+                localStorage.clear();
+                location.reload();
+            }
         }
 
         function completeQuest(el) {
             if(el.classList.contains('completed')) return;
             el.classList.add('completed');
-            completed++;
-            save();
-            updateRankVisuals();
+            completed++; save(); updateRankVisuals();
             if(completed >= 3) {
                 setTimeout(() => {
-                    currentLvl++; completed = 0; 
-                    activeQuests = [];
-                    localStorage.removeItem(QUEST_KEY);
-                    localStorage.removeItem(TIMER_KEY);
-                    save(); 
-                    showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Vous avez atteint le Niveau " + currentLvl + " !");
+                    currentLvl++; completed = 0; activeQuests = [];
+                    localStorage.removeItem(QUEST_KEY); localStorage.removeItem(TIMER_KEY);
+                    save(); showSystemAlert("[ FÉLICITATIONS ]", "Niveau " + currentLvl + " atteint !");
                     document.getElementById('btn-accept').classList.remove('hidden');
-                    initMissions(false);
-                    clearInterval(dailyInterval);
+                    initMissions(false); clearInterval(dailyInterval);
                     document.getElementById('main-timer').innerText = "24:00:00";
                 }, 500);
-            } else {
-                startRecovery();
-            }
+            } else { startRecovery(); }
         }
 
         function startRecovery() {
-            isRecovering = true;
-            let s = 30;
+            isRecovering = true; let s = 30;
             const widget = document.getElementById('rec-widget');
-            widget.classList.add('recovery-active');
             const itv = setInterval(() => {
-                s--;
-                document.getElementById('rec-timer').innerText = `00:${s < 10 ? '0'+s : s}`;
-                if(s <= 0) {
-                    clearInterval(itv); isRecovering = false;
-                    widget.classList.remove('recovery-active');
-                    document.getElementById('rec-timer').innerText = "00:00";
-                }
+                s--; document.getElementById('rec-timer').innerText = `00:${s < 10 ? '0'+s : s}`;
+                if(s <= 0) { clearInterval(itv); isRecovering = false; document.getElementById('rec-timer').innerText = "00:00"; }
             }, 1000);
         }
     </script>
