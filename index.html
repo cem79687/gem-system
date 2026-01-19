@@ -126,25 +126,39 @@
     </div>
 
     <div id="goal-screen" class="login-container hidden">
-        <div class="login-card" style="border: 1px solid var(--solo-blue);">
-            <div class="login-header"><h2>SCAN DU PROFIL</h2><p>Définition de la voie d'évolution</p></div>
-            <div class="input-group">
-                <label>Objectif Principal</label>
-                <select id="goal-type" class="neural-input" style="background: #1a1d26;">
-                    <option value="muscle_gain">💪 Prise de Masse</option>
-                    <option value="weight_loss">🔥 Perte de Graisse</option>
-                    <option value="endurance">🏃 Endurance</option>
-                </select>
+        <div class="login-card" style="border: 2px solid var(--solo-blue); background: linear-gradient(180deg, rgba(13, 16, 23, 0.95) 0%, rgba(7, 9, 14, 0.98) 100%);">
+            <div class="login-header">
+                <div style="font-family:'Orbitron'; color:var(--solo-cyan); font-size:10px; letter-spacing:2px; margin-bottom:5px;">[ NEURAL DIAGNOSTIC ]</div>
+                <h2 style="font-size: 1.5rem; text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);">ANALYSE DU PROFIL</h2>
+                <div style="width: 50px; height: 2px; background: var(--solo-cyan); margin: 15px auto; box-shadow: 0 0 10px var(--solo-cyan);"></div>
+                <p style="font-size: 11px; line-height: 1.4;">Définition de la trajectoire d'évolution pour l'unité Hunter.</p>
             </div>
-            <div class="input-group">
-                <label>Intensité</label>
-                <select id="goal-intensity" class="neural-input" style="background: #1a1d26;">
-                    <option value="1">Recrue (x1.0)</option>
-                    <option value="1.5">Soldat (x1.5)</option>
-                    <option value="2.5">Élite (x2.5)</option>
-                </select>
+            <div style="text-align: left; margin-top: 20px;">
+                <div class="input-group">
+                    <label style="color: var(--solo-cyan); font-size: 9px;">🎯 PROTOCOLE PRIORITAIRE</label>
+                    <select id="goal-type" class="neural-input" style="background: rgba(26, 29, 38, 0.8); border: 1px solid rgba(0, 229, 255, 0.2); cursor: pointer;">
+                        <option value="muscle_gain">💪 AUGMENTATION MASSE (STRENGTH)</option>
+                        <option value="weight_loss">🔥 COMBUSTION THERMIQUE (LEAN)</option>
+                        <option value="endurance">🏃 OPTIMISATION ENDURANCE (STAMINA)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label style="color: var(--solo-cyan); font-size: 9px;">⚡ INTENSITÉ DU SYSTÈME</label>
+                    <select id="goal-intensity" class="neural-input" style="background: rgba(26, 29, 38, 0.8); border: 1px solid rgba(0, 229, 255, 0.2); cursor: pointer;">
+                        <option value="1">RECRUE - ADAPTATION (x1.0)</option>
+                        <option value="1.5">SOLDAT - RÉGULIER (x1.5)</option>
+                        <option value="2.5">ÉLITE - SURCHARGE (x2.5)</option>
+                    </select>
+                </div>
             </div>
-            <button onclick="confirmScan()" class="btn-init">CONFIRMER LE SCAN</button>
+            <div style="margin: 20px 0; padding: 10px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 10px;">
+                <div style="font-family:'JetBrains Mono'; font-size: 8px; color: var(--text-muted); text-align: center; margin-bottom: 5px;">PRÉ-CALCUL DES COORDONNÉES...</div>
+                <div style="height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+                    <div style="width: 65%; height: 100%; background: var(--solo-blue); box-shadow: 0 0 10px var(--solo-blue);"></div>
+                </div>
+            </div>
+            <button onclick="confirmScan()" class="btn-init" style="box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); letter-spacing: 2px;">DÉMARRER LA SYNCHRONISATION</button>
+            <div style="margin-top: 15px; font-family:'JetBrains Mono'; font-size: 7px; color: var(--system-red); opacity: 0.7;">ATTENTION : LE PROTOCOLE SERA LIÉ À VOTRE SIGNATURE NEURONALE.</div>
         </div>
     </div>
 
@@ -158,14 +172,18 @@
 
     <div id="main-hud" class="hud-wrapper hidden">
         <div id="hud-container">
+            
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-shrink: 0;">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
                         <img id="avatar-hud" src="" style="width:100%; height:100%; object-fit:cover;">
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-start; margin-top: 12px;">
-                        <div id="display-name" style="font-family:'Orbitron'; font-size:18px; font-weight:900;">HUNTER</div>
-                        <img id="rank-badge-img" src="rang/rangE.png">
+                    <div style="display:flex; flex-direction:column; align-items:flex-start; margin-top: 5px;">
+                        <div id="display-name" style="font-family:'Orbitron'; font-size:18px; font-weight:900; text-transform: uppercase; color: #fff;">HUNTER</div>
+                        <div style="font-family:'Orbitron'; font-size:10px; color:var(--solo-cyan); letter-spacing:1px; margin-top: 2px;">
+                            LEVEL : <span id="display-lvl" style="font-size:14px; font-weight:700; color:var(--solo-cyan);">1</span>
+                        </div>
+                        <img id="rank-badge-img" src="rang/rangE.png" style="height:60px; margin-top: 5px;">
                     </div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center;">
@@ -200,34 +218,38 @@
                 <div id="main-timer" style="font-family:'JetBrains Mono'; font-size:20px; color:var(--system-red); font-weight:700;">24:00:00</div>
                 <button id="btn-accept" class="btn-init" style="width:auto; padding:10px 20px;" onclick="acceptMissions()">ACCEPTER</button>
             </div>
+
         </div>
     </div>
 
     <script>
-        const KEY = "HUNTER_V1_STORAGE", TIMER_KEY = "HUNTER_TIMER_END", QUEST_KEY = "HUNTER_CURRENT_QUESTS";
+        const KEY = "HUNTER_V1_STORAGE";
+        const TIMER_KEY = "HUNTER_TIMER_END";
+        const QUEST_KEY = "HUNTER_CURRENT_QUESTS";
+
         let currentLvl = 1, completed = 0, isRecovering = false, dailyInterval = null;
-        let activeQuests = [], currentHunterName = "";
+        let activeQuests = [];
+        let currentHunterName = "";
 
         const EXERCISES_POOL = [
-            { name: "Pompes", base: 10, unit: "Reps" }, { name: "Squats", base: 15, unit: "Reps" },
-            { name: "Gainage", base: 30, unit: "s" }, { name: "Fentes", base: 10, unit: "Reps/j" },
-            { name: "Dips", base: 8, unit: "Reps" }, { name: "Mountain Climbers", base: 20, unit: "Reps" },
-        
-{ name: "Tractions", base: 5, unit: "Reps" },
-{ name: "Burpees", base: 8, unit: "Reps" },
-{ name: "Course à pied", base: 1, unit: "km" },
-{ name: "Planche latérale", base: 20, unit: "s/coté" },
-{ name: "Crunchs", base: 20, unit: "Reps" },
-// Cardio
-{ name: "Jumping Jacks", base: 30, unit: "Reps" },
-{ name: "Sprint sur place", base: 30, unit: "s" },
-{ name: "Shadow Boxing", base: 60, unit: "s" },
-
-// Souplesse / Mobilité
-{ name: "Étirement Ischios", base: 45, unit: "s/jambe" },
-{ name: "Posture de l'Enfant", base: 60, unit: "s" },
-{ name: "Rotation des épaules", base: 20, unit: "Reps" },
-{ name: "Cobra (Lombaire)", base: 30, unit: "s" }
+            { name: "Pompes", base: 10, unit: "Reps" },
+            { name: "Squats", base: 15, unit: "Reps" },
+            { name: "Gainage", base: 30, unit: "s" },
+            { name: "Fentes", base: 10, unit: "Reps/j" },
+            { name: "Dips", base: 8, unit: "Reps" },
+            { name: "Mountain Climbers", base: 20, unit: "Reps" },
+            { name: "Tractions", base: 5, unit: "Reps" },
+            { name: "Burpees", base: 8, unit: "Reps" },
+            { name: "Course à pied", base: 1, unit: "km" },
+            { name: "Planche latérale", base: 20, unit: "s/coté" },
+            { name: "Crunchs", base: 20, unit: "Reps" },
+            { name: "Jumping Jacks", base: 30, unit: "Reps" },
+            { name: "Sprint sur place", base: 30, unit: "s" },
+            { name: "Shadow Boxing", base: 60, unit: "s" },
+            { name: "Étirement Ischios", base: 45, unit: "s/jambe" },
+            { name: "Posture de l'Enfant", base: 60, unit: "s" },
+            { name: "Rotation des épaules", base: 20, unit: "Reps" },
+            { name: "Cobra (Lombaire)", base: 30, unit: "s" }
         ];
 
         function goToScan() {
@@ -239,8 +261,9 @@
 
         function confirmScan() {
             const overlay = document.getElementById('sync-overlay');
+            const fill = document.getElementById('sync-fill');
             overlay.classList.add('active');
-            setTimeout(() => { document.getElementById('sync-fill').style.width = '100%'; }, 100);
+            setTimeout(() => { fill.style.width = '100%'; }, 100);
             setTimeout(() => {
                 document.getElementById('goal-screen').classList.add('hidden');
                 overlay.classList.remove('active');
@@ -270,21 +293,20 @@
             }
         }
 
-        /* --- CORRECTIF : GESTION DU QUOTA EXCEDÉ --- */
         function generateRandomMissions() {
             let shuffled = [...EXERCISES_POOL].sort(() => 0.5 - Math.random());
+            let selected = shuffled.slice(0, 3);
             let factor = Math.floor((currentLvl - 1) / 5);
-            activeQuests = shuffled.slice(0, 3).map(ex => ({
-                t: ex.name, r: Math.floor(ex.base + (ex.base * factor * 0.2)) + " " + ex.unit
+            activeQuests = selected.map(ex => ({
+                t: ex.name,
+                r: Math.floor(ex.base + (ex.base * factor * 0.2)) + " " + ex.unit
             }));
-            
             try {
                 localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
-            } catch (e) {
-                console.warn("Quota dépassé, tentative de purge...");
-                localStorage.clear(); // Nettoie le stockage pour libérer de la place
+            } catch(e) {
+                localStorage.clear();
                 localStorage.setItem(QUEST_KEY, JSON.stringify(activeQuests));
-                save(); 
+                save();
             }
         }
 
@@ -311,7 +333,8 @@
         function load() {
             const d = JSON.parse(localStorage.getItem(KEY));
             if(d) {
-                currentLvl = d.lvl || 1; completed = d.completed || 0;
+                currentLvl = d.lvl || 1;
+                completed = d.completed || 0;
                 document.getElementById('u-age').value = d.age || "";
                 document.getElementById('u-height').value = d.h || "";
                 document.getElementById('u-weight').value = d.w || "";
@@ -319,94 +342,114 @@
                 if(d.avatar) document.getElementById('avatar-hud').src = d.avatar;
             }
             const savedEnd = localStorage.getItem(TIMER_KEY);
-            initMissions(savedEnd && (parseInt(savedEnd) > Date.now()));
+            const hasActiveTimer = savedEnd && (parseInt(savedEnd) > Date.now());
+            initMissions(hasActiveTimer);
             updateRankVisuals();
         }
 
         function checkExistingTimer() {
             const savedEnd = localStorage.getItem(TIMER_KEY);
-            if (savedEnd && parseInt(savedEnd) > Date.now()) {
-                startDailyTimer();
-                const sq = localStorage.getItem(QUEST_KEY);
-                if(sq) activeQuests = JSON.parse(sq);
-                initMissions(true);
-                document.getElementById('btn-accept').classList.add('hidden');
-            } else {
-                localStorage.removeItem(TIMER_KEY); localStorage.removeItem(QUEST_KEY);
-                document.getElementById('btn-accept').classList.remove('hidden');
-                initMissions(false);
-                document.getElementById('main-timer').innerText = "24:00:00";
+            if (savedEnd) {
+                const remaining = Math.floor((parseInt(savedEnd) - Date.now()) / 1000);
+                if (remaining > 0) {
+                    startDailyTimer();
+                    const savedQuests = localStorage.getItem(QUEST_KEY);
+                    if(savedQuests) activeQuests = JSON.parse(savedQuests);
+                    initMissions(true);
+                    document.getElementById('btn-accept').classList.add('hidden');
+                } else {
+                    localStorage.removeItem(TIMER_KEY);
+                    localStorage.removeItem(QUEST_KEY);
+                    document.getElementById('btn-accept').classList.remove('hidden');
+                    initMissions(false);
+                    document.getElementById('main-timer').innerText = "24:00:00";
+                }
             }
         }
 
         function updateRankVisuals() {
             const badge = document.getElementById('rank-badge-img');
-            if(badge) badge.src = "rang/rang" + (currentLvl >= 10 ? "D" : "E") + ".png";
+            document.getElementById('display-lvl').innerText = currentLvl; 
+            let file = (currentLvl >= 10) ? "rangD.png" : "rangE.png";
+            if(badge) badge.src = "rang/" + file;
             let pc = Math.round((completed / 3) * 100);
             document.getElementById('xp-fill-session').style.width = pc + "%";
             document.getElementById('session-pc').innerText = pc + "%";
         }
 
         function save() {
-            const h = parseFloat(document.getElementById('u-height').value) || 0, w = parseFloat(document.getElementById('u-weight').value) || 0;
+            const h = parseFloat(document.getElementById('u-height').value) || 0;
+            const w = parseFloat(document.getElementById('u-weight').value) || 0;
             if(h > 0) document.getElementById('u-imc').innerText = (w / ((h/100)**2)).toFixed(1);
             try {
-                localStorage.setItem(KEY, JSON.stringify({ lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed }));
-            } catch(e) { console.error("Sauvegarde impossible : stockage plein."); }
+                const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
+                localStorage.setItem(KEY, JSON.stringify(data));
+            } catch(e) { 
+                console.error("Storage full"); 
+                localStorage.clear();
+                const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
+                localStorage.setItem(KEY, JSON.stringify(data));
+            }
             updateRankVisuals();
         }
 
         function initMissions(reveal) {
             const container = document.getElementById('mission-container');
             container.innerHTML = "";
-            const dq = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
-            dq.forEach((q, i) => {
+            const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
+            displayQuests.forEach((q, index) => {
                 const div = document.createElement('div');
                 div.className = reveal ? "mission-box active" : "mission-box";
-                if(reveal && i < completed) div.classList.add('completed');
+                if(reveal && index < completed) div.classList.add('completed');
                 div.innerHTML = `<strong>${q.t}</strong><br><small>${reveal ? q.r : 'Locked'}</small>`;
                 div.onclick = () => { if(reveal && !isRecovering) completeQuest(div); };
                 container.appendChild(div);
             });
         }
 
-        /* --- CORRECTIF : BOUTON ACCEPTER --- */
         function acceptMissions() {
-            try {
-                generateRandomMissions();
-                initMissions(true);
-                document.getElementById('btn-accept').classList.add('hidden');
-                startDailyTimer(86400);
-                showSystemAlert("[ SYSTÈME ]", "Quête acceptée. Le décompte de 24h a commencé.");
-            } catch(err) {
-                alert("Erreur critique de stockage détectée. Réinitialisation du cache...");
-                localStorage.clear();
-                location.reload();
-            }
+            generateRandomMissions();
+            initMissions(true);
+            document.getElementById('btn-accept').classList.add('hidden');
+            startDailyTimer(86400);
+            showSystemAlert("[ SYSTÈME ]", "Quête acceptée. Le décompte de 24h a commencé.");
         }
 
         function completeQuest(el) {
             if(el.classList.contains('completed')) return;
             el.classList.add('completed');
-            completed++; save(); updateRankVisuals();
+            completed++;
+            save();
+            updateRankVisuals();
             if(completed >= 3) {
                 setTimeout(() => {
-                    currentLvl++; completed = 0; activeQuests = [];
-                    localStorage.removeItem(QUEST_KEY); localStorage.removeItem(TIMER_KEY);
-                    save(); showSystemAlert("[ FÉLICITATIONS ]", "Niveau " + currentLvl + " atteint !");
+                    currentLvl++; completed = 0; 
+                    activeQuests = [];
+                    localStorage.removeItem(QUEST_KEY);
+                    localStorage.removeItem(TIMER_KEY);
+                    save(); 
+                    showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Vous avez atteint le Niveau " + currentLvl + " !");
                     document.getElementById('btn-accept').classList.remove('hidden');
-                    initMissions(false); clearInterval(dailyInterval);
+                    initMissions(false);
+                    clearInterval(dailyInterval);
                     document.getElementById('main-timer').innerText = "24:00:00";
                 }, 500);
-            } else { startRecovery(); }
+            } else {
+                startRecovery();
+            }
         }
 
         function startRecovery() {
-            isRecovering = true; let s = 30;
+            isRecovering = true;
+            let s = 30;
             const widget = document.getElementById('rec-widget');
             const itv = setInterval(() => {
-                s--; document.getElementById('rec-timer').innerText = `00:${s < 10 ? '0'+s : s}`;
-                if(s <= 0) { clearInterval(itv); isRecovering = false; document.getElementById('rec-timer').innerText = "00:00"; }
+                s--;
+                document.getElementById('rec-timer').innerText = `00:${s < 10 ? '0'+s : s}`;
+                if(s <= 0) {
+                    clearInterval(itv); isRecovering = false;
+                    document.getElementById('rec-timer').innerText = "00:00";
+                }
             }, 1000);
         }
     </script>
