@@ -162,6 +162,10 @@
             50% { opacity: 1; box-shadow: inset 0 0 25px rgba(255, 61, 61, 0.2); }
             100% { opacity: 0.5; box-shadow: inset 0 0 10px rgba(255, 61, 61, 0.1); }
         }
+        /* Couleurs dynamiques pour l'IMC */
+        .imc-normal { color: var(--system-green) !important; text-shadow: 0 0 10px var(--system-green); }
+        .imc-warning { color: var(--system-red) !important; text-shadow: 0 0 10px var(--system-red); }
+        .imc-alert { color: var(--recovery-gold) !important; text-shadow: 0 0 10px var(--recovery-gold); }
     </style>
 </head>
 <body>
@@ -481,80 +485,125 @@
         function save() {
             const h = parseFloat(document.getElementById('u-height').value) || 0;
             const w = parseFloat(document.getElementById('u-weight').value) || 0;
-            if(h > 0) document.getElementById('u-imc').innerText = (w / ((h/100)**2)).toFixed(1);
+            
+            // --- NOUVELLE LOGIQUE IMC AVEC COULEURS ---
+            if(h > 0) {
+                const imc = (w / ((h/100)**2)).toFixed(1);
+                const imcEl = document.getElementById('u-imc');
+                imcEl.innerText = imc;
+                
+                // On retire les anciennes couleurs avant d'appliquer la nouvelle
+                imcEl.classList.remove('imc-normal', 'imc-warning', 'imc-alert');
+                
+                // Application de la couleur selon la zone de santé
+                if(imc >= 18.5 && imc <= 25) {
+                    imcEl.classList.add('imc-normal');  // VERT : Santé optimale
+                } else if(imc > 25) {
+                    imcEl.classList.add('imc-warning'); // ROUGE : Surpoids / Alerte
+                } else {
+                    imcEl.classList.add('imc-alert');   // OR : Sous-poids
+                }
+            }
+
+            // --- SAUVEGARDE DES DONNÉES ---
             try {
-                const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
+                const data = { 
+                    lvl: currentLvl, 
+                    age: document.getElementById('u-age').value, 
+                    h: h, 
+                    w: w, 
+                    sex: document.getElementById('u-sex').value, 
+                    avatar: document.getElementById('avatar-hud').src, 
+                    completed: completed 
+                };
                 localStorage.setItem(KEY, JSON.stringify(data));
-            } catch(e) { console.error("Storage full"); }
+            } catch(e) { 
+                console.error("Storage full"); 
+            }
+            
             updateRankVisuals();
         }
 
         function initMissions(reveal) {
-            const container = document.getElementById('mission-container');
-            container.innerHTML = "";
-            
-            // VERIFICATION DU MODE VEILLE
-            // Si le timer n'existe pas et qu'on n'a pas de quêtes actives après avoir fini un niveau
-            if (!reveal && !localStorage.getItem(TIMER_KEY) && currentLvl > 1 && completed === 0) {
-                container.innerHTML = `
-                    <div class="mission-box system-sleep">
-                        <div style="font-size: 14px; margin-bottom: 10px;">[ SYSTÈME EN VEILLE ]</div>
-                        <div style="font-family: 'JetBrains Mono'; font-size: 8px; color: var(--text-muted); text-transform: none;">
-                            Récupération neuronale nécessaire.<br>
-                            Optimisation des statistiques en cours...<br>
-                            <span style="color: var(--system-red); opacity: 0.7;">Initialisation auto. dans 24h</span>
-                        </div>
-                    </div>`;
-                return;
-            }
+    const container = document.getElementById('mission-container');
+    container.innerHTML = "";
+    
+    // VERIFICATION DU STOCKAGE : Le système est-il en veille ?
+    if (localStorage.getItem('SYSTEM_SLEEP') === 'true') {
+        document.getElementById('btn-accept').classList.add('hidden'); 
+        container.innerHTML = `
+            <div class="mission-box system-sleep">
+                <div style="font-size: 14px; margin-bottom: 10px;">[ SYSTÈME EN VEILLE ]</div>
+                <div style="font-family: 'JetBrains Mono'; font-size: 8px; color: var(--text-muted); text-transform: none;">
+                    Récupération neuronale nécessaire.<br>
+                    Optimisation des statistiques en cours...<br>
+                    <span style="color: var(--system-red); opacity: 0.7;">Initialisation auto. demain</span>
+                </div>
+            </div>`;
+        return;
+    }
 
-            const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
-            displayQuests.forEach((q, index) => {
-                const div = document.createElement('div');
-                div.className = reveal ? "mission-box active" : "mission-box";
-                if(reveal && index < completed) div.classList.add('completed');
-                div.innerHTML = `<strong>${q.t}</strong><br><small>${reveal ? q.r : 'Locked'}</small>`;
-                div.onclick = () => { if(reveal && !isRecovering) completeQuest(div); };
-                container.appendChild(div);
-            });
-        }
+    const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
+    displayQuests.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.className = reveal ? "mission-box active" : "mission-box";
+        if(reveal && index < completed) div.classList.add('completed');
+        div.innerHTML = `<strong>${q.t}</strong><br><small>${reveal ? q.r : 'Locked'}</small>`;
+        div.onclick = () => { if(reveal && !isRecovering) completeQuest(div); };
+        container.appendChild(div);
+    });
+}
 
         function acceptMissions() {
+            // On vérifie si on est en mode veille
+            if (localStorage.getItem('SYSTEM_SLEEP') === 'true') {
+                showSystemAlert("[ SYSTÈME ]", "Récupération en cours. Revenez plus tard.");
+                return; 
+            }
+
+            // Si on n'est plus en veille, on nettoie et on lance les missions
+            localStorage.removeItem('SYSTEM_SLEEP'); 
+            
             playSfx('click');
             generateRandomMissions();
             initMissions(true);
+            
+            // On cache le bouton pendant que les missions sont actives
             document.getElementById('btn-accept').classList.add('hidden');
+            
             startDailyTimer(86400);
             showSystemAlert("[ SYSTÈME ]", "Quête acceptée. Le décompte de 24h a commencé.");
         }
-
-        function completeQuest(el) {
-            if(el.classList.contains('completed')) return;
-            el.classList.add('completed');
-            completed++;
-            save();
-            updateRankVisuals();
-            if(completed >= 3) {
-                setTimeout(() => {
-                    playSfx('levelUp');
-                    currentLvl++; completed = 0; 
-                    activeQuests = [];
-                    localStorage.removeItem(QUEST_KEY);
-                    localStorage.removeItem(TIMER_KEY);
-                    save(); 
-                    showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Niveau " + currentLvl + " atteint !");
-                    
-                    // ON CACHE LE BOUTON POUR LA VEILLE
-                    document.getElementById('btn-accept').classList.add('hidden');
-                    
-                    initMissions(false);
-                    clearInterval(dailyInterval);
-                    document.getElementById('main-timer').innerText = "24:00:00";
-                }, 500);
-            } else {
-                startRecovery();
-            }
-        }
+function completeQuest(el) {
+    if(el.classList.contains('completed')) return;
+    el.classList.add('completed');
+    completed++;
+    save();
+    updateRankVisuals();
+    if(completed >= 3) {
+        setTimeout(() => {
+            playSfx('levelUp');
+            currentLvl++; completed = 0; 
+            activeQuests = [];
+            localStorage.removeItem(QUEST_KEY);
+            localStorage.removeItem(TIMER_KEY);
+            
+            // ON SAUVEGARDE L'ÉTAT DE VEILLE DANS LE NAVIGATEUR
+            localStorage.setItem('SYSTEM_SLEEP', 'true');
+            
+            save(); 
+            showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Niveau " + currentLvl + " atteint !");
+            
+            document.getElementById('btn-accept').classList.add('hidden'); 
+            initMissions(false);
+            
+            clearInterval(dailyInterval);
+            document.getElementById('main-timer').innerText = "24:00:00";
+        }, 500);
+    } else {
+        startRecovery();
+    }
+}
 
         function startRecovery() {
             isRecovering = true;
