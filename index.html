@@ -101,6 +101,67 @@
         #sync-overlay.active { visibility: visible; opacity: 1; }
         .sync-bar-container { width: 250px; height: 2px; background: rgba(0, 229, 255, 0.1); margin-top: 20px; position: relative; }
         .sync-bar-fill { width: 0%; height: 100%; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); transition: width 2s ease-in-out; }
+
+        /* BLOC BOUTON SYSTEM LATÉRAL */
+        .system-trigger {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(90deg, #ff3d3d, #8b0000);
+            padding: 15px 5px;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            writing-mode: vertical-lr;
+            font-family: 'Orbitron';
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #fff;
+            box-shadow: 5px 0 15px rgba(255, 61, 61, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 2000;
+            transition: 0.3s;
+        }
+        .system-trigger:hover { right: -35px; background: #ff3d3d; }
+
+        /* PANNEAU SYSTÈME COULISSANT */
+        #system-panel {
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 9, 14, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 3000;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px;
+            border-radius: 40px;
+            border-left: 2px solid var(--system-red);
+        }
+        #system-panel.open { right: 0; }
+        /* --- ÉTAT DE VEILLE DU SYSTÈME --- */
+        .system-sleep {
+            background: rgba(255, 61, 61, 0.05) !important;
+            border: 1px dashed var(--system-red) !important;
+            color: var(--system-red) !important;
+            text-align: center;
+            padding: 40px 15px;
+            font-family: 'Orbitron';
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 10px;
+            border-radius: 15px;
+            animation: pulseSleep 2.5s infinite ease-in-out;
+            grid-column: span 1;
+        }
+
+        @keyframes pulseSleep {
+            0% { opacity: 0.5; box-shadow: inset 0 0 10px rgba(255, 61, 61, 0.1); }
+            50% { opacity: 1; box-shadow: inset 0 0 25px rgba(255, 61, 61, 0.2); }
+            100% { opacity: 0.5; box-shadow: inset 0 0 10px rgba(255, 61, 61, 0.1); }
+        }
     </style>
 </head>
 <body>
@@ -173,16 +234,30 @@
     <div id="main-hud" class="hud-wrapper hidden">
         <div id="hud-container">
             
+            <div class="system-trigger" onclick="toggleSystemPanel()">SYSTEM</div>
+            <div id="system-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h2 style="font-family:'Orbitron'; color:var(--system-red); font-size:18px;">SYSTEM MENU</h2>
+                    <div onclick="toggleSystemPanel()" style="cursor:pointer; color:var(--text-muted); font-size:20px;">✕</div>
+                </div>
+                <div style="color:var(--text-muted); font-family:'JetBrains Mono'; font-size:12px;">
+                    <p>[ INITIALISATION DES PARAMÈTRES... ]</p>
+                    <div style="margin-top:20px; padding:15px; border:1px solid rgba(255,61,61,0.2); border-radius:10px;">
+                        En attente de données supplémentaires...
+                    </div>
+                </div>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-shrink: 0;">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
                         <img id="avatar-hud" src="" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-start; margin-top: 5px;">
-                        <div id="display-name" style="font-family:'Orbitron'; font-size:18px; font-weight:900; text-transform: uppercase; color: #fff;">HUNTER</div>
-                        <div style="font-family:'Orbitron'; font-size:10px; color:var(--solo-cyan); letter-spacing:1px; margin-top: 2px;">
-                            LEVEL : <span id="display-lvl" style="font-size:14px; font-weight:700; color:var(--solo-cyan);">1</span>
+                        <div style="font-family:'Orbitron'; font-size:10px; color:var(--solo-cyan); letter-spacing:1px; margin-bottom: 2px;">
+                            LEVEL : <span id="display-lvl" style="font-size:16px; font-weight:900; color:#fff;">1</span>
                         </div>
+                        <div id="display-name" style="font-family:'Orbitron'; font-size:18px; font-weight:900; text-transform: uppercase;">HUNTER</div>
                         <img id="rank-badge-img" src="rang/rangE.png" style="height:60px; margin-top: 5px;">
                     </div>
                 </div>
@@ -223,6 +298,22 @@
     </div>
 
     <script>
+        // --- BIBLIOTHÈQUE AUDIO SYSTÈME ---
+        const SOUNDS = {
+            click: new Audio("https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"),
+            scan: new Audio("https://assets.mixkit.co/active_storage/sfx/930/930-preview.mp3"),
+            levelUp: new Audio("https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"),
+            alert: new Audio("https://assets.mixkit.co/active_storage/sfx/959/959-preview.mp3")
+        };
+
+        function playSfx(name) {
+            if (SOUNDS[name]) {
+                SOUNDS[name].currentTime = 0;
+                SOUNDS[name].volume = 0.4;
+                SOUNDS[name].play().catch(() => {});
+            }
+        }
+
         const KEY = "HUNTER_V1_STORAGE";
         const TIMER_KEY = "HUNTER_TIMER_END";
         const QUEST_KEY = "HUNTER_CURRENT_QUESTS";
@@ -252,7 +343,15 @@
             { name: "Cobra (Lombaire)", base: 30, unit: "s" }
         ];
 
+        // FONCTION TOGGLE SYSTEM
+        function toggleSystemPanel() {
+            playSfx('click');
+            const panel = document.getElementById('system-panel');
+            panel.classList.toggle('open');
+        }
+
         function goToScan() {
+            playSfx('click');
             currentHunterName = document.getElementById('hunter-id').value;
             if(!currentHunterName) return alert("Nom de Hunter requis");
             document.getElementById('login-screen').classList.add('hidden');
@@ -260,6 +359,7 @@
         }
 
         function confirmScan() {
+            playSfx('scan');
             const overlay = document.getElementById('sync-overlay');
             const fill = document.getElementById('sync-fill');
             overlay.classList.add('active');
@@ -275,6 +375,7 @@
         }
 
         function showSystemAlert(title, msg) {
+            playSfx('alert');
             document.getElementById('alert-title').innerText = title;
             document.getElementById('alert-msg').innerText = msg;
             document.getElementById('system-alert').style.display = 'block';
@@ -384,18 +485,29 @@
             try {
                 const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
                 localStorage.setItem(KEY, JSON.stringify(data));
-            } catch(e) { 
-                console.error("Storage full"); 
-                localStorage.clear();
-                const data = { lvl: currentLvl, age: document.getElementById('u-age').value, h: h, w: w, sex: document.getElementById('u-sex').value, avatar: document.getElementById('avatar-hud').src, completed: completed };
-                localStorage.setItem(KEY, JSON.stringify(data));
-            }
+            } catch(e) { console.error("Storage full"); }
             updateRankVisuals();
         }
 
         function initMissions(reveal) {
             const container = document.getElementById('mission-container');
             container.innerHTML = "";
+            
+            // VERIFICATION DU MODE VEILLE
+            // Si le timer n'existe pas et qu'on n'a pas de quêtes actives après avoir fini un niveau
+            if (!reveal && !localStorage.getItem(TIMER_KEY) && currentLvl > 1 && completed === 0) {
+                container.innerHTML = `
+                    <div class="mission-box system-sleep">
+                        <div style="font-size: 14px; margin-bottom: 10px;">[ SYSTÈME EN VEILLE ]</div>
+                        <div style="font-family: 'JetBrains Mono'; font-size: 8px; color: var(--text-muted); text-transform: none;">
+                            Récupération neuronale nécessaire.<br>
+                            Optimisation des statistiques en cours...<br>
+                            <span style="color: var(--system-red); opacity: 0.7;">Initialisation auto. dans 24h</span>
+                        </div>
+                    </div>`;
+                return;
+            }
+
             const displayQuests = reveal ? activeQuests : [{t:"???", r:"Locked"}, {t:"???", r:"Locked"}, {t:"???", r:"Locked"}];
             displayQuests.forEach((q, index) => {
                 const div = document.createElement('div');
@@ -408,6 +520,7 @@
         }
 
         function acceptMissions() {
+            playSfx('click');
             generateRandomMissions();
             initMissions(true);
             document.getElementById('btn-accept').classList.add('hidden');
@@ -423,13 +536,17 @@
             updateRankVisuals();
             if(completed >= 3) {
                 setTimeout(() => {
+                    playSfx('levelUp');
                     currentLvl++; completed = 0; 
                     activeQuests = [];
                     localStorage.removeItem(QUEST_KEY);
                     localStorage.removeItem(TIMER_KEY);
                     save(); 
-                    showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Vous avez atteint le Niveau " + currentLvl + " !");
-                    document.getElementById('btn-accept').classList.remove('hidden');
+                    showSystemAlert("[ FÉLICITATIONS ]", "Mission accomplie. Niveau " + currentLvl + " atteint !");
+                    
+                    // ON CACHE LE BOUTON POUR LA VEILLE
+                    document.getElementById('btn-accept').classList.add('hidden');
+                    
                     initMissions(false);
                     clearInterval(dailyInterval);
                     document.getElementById('main-timer').innerText = "24:00:00";
