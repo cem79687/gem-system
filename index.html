@@ -1,6 +1,70 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <script type="module">
+    // 1. Les imports (TOUS groupés en haut)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+    // On regroupe tout Firestore en UNE SEULE ligne
+    import { initializeFirestore, doc, setDoc, getDoc, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+    // 2. Ta configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCGPf-OCrKrN1z1PS09QSzsZXABWhrLeS4",
+        authDomain: "hunter-system-44f6f.firebaseapp.com",
+        projectId: "hunter-system-44f6f",
+        storageBucket: "hunter-system-44f6f.firebasestorage.app",
+        messagingSenderId: "58331600704",
+        appId: "1:58331600704:web:81262ce74dbf74f2550ca5"
+    };
+
+    // 3. L'initialisation
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    // Initialisation ROBUSTE de la base de données (pour corriger l'erreur "Offline")
+    const db = initializeFirestore(app, {
+        localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+    });
+
+    // 4. Les fonctions de liaison (window.fbLogin, etc.)
+    // ... la suite de ton code ...
+
+
+        /// Pont entre Firebase et ton code existant
+window.fbLogin = async (id, pass) => {
+    const email = id.toLowerCase().replace(/\s/g, '') + "@hunter.com";
+    try { 
+        return await signInWithEmailAndPassword(auth, email, pass); 
+    } catch(e) { 
+        return await createUserWithEmailAndPassword(auth, email, pass); 
+    }
+};
+
+// Doit être DANS le script type="module"
+window.cloudSave = async (data) => {
+    if (auth.currentUser) {
+        try {
+            await setDoc(doc(db, "hunters", auth.currentUser.uid), data, { merge: true });
+            console.log("✅ Sauvegarde Cloud réussie !");
+        } catch (e) {
+            console.error("❌ Erreur Cloud:", e);
+        }
+    } else {
+        console.warn("⚠️ Pas d'utilisateur connecté au Cloud");
+    }
+};
+
+window.cloudLoad = async () => {
+    if (auth.currentUser) {
+        const s = await getDoc(doc(db, "hunters", auth.currentUser.uid));
+        return s.exists() ? s.data() : null;
+    }
+    return null;
+};
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hunter v1 - Neural Interface</title>
@@ -179,12 +243,13 @@
     <div id="login-screen" class="login-container">
         <div class="login-card">
             <div class="ai-logo-selector" onclick="document.getElementById('avatar-input').click()">
-                <img id="login-preview" src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+               <img id="login-preview" src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
             </div>
             <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="previewLoginAvatar(this)">
-            <div class="login-header"><h2>Neural Access</h2><p>Hunter v1 Professional Suite</p></div>
             <div class="input-group"><label>Identifier</label><input type="text" id="hunter-id" class="neural-input" placeholder="Hunter Name..."></div>
             <div class="input-group"><label>Passcode</label><input type="password" id="hunter-pass" class="neural-input" placeholder="••••••••"></div>
+            <div class="login-header"><h2>Neural Access</h2><p>Hunter v1 Professional Suite</p></div>
+            
             <label class="remember-container"><input type="checkbox" id="remember-me"> Se souvenir de moi</label>
             <button onclick="goToScan()" class="btn-init">Initialize Hunter Protocol</button>
         </div>
@@ -354,29 +419,104 @@
             panel.classList.toggle('open');
         }
 
-        function goToScan() {
-            playSfx('click');
-            currentHunterName = document.getElementById('hunter-id').value;
-            if(!currentHunterName) return alert("Nom de Hunter requis");
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('goal-screen').classList.remove('hidden');
-        }
+     async function goToScan() {
+    playSfx('click');
+    
+    // 1. Récupération des données
+    const id = document.getElementById('hunter-id').value;
+    const pass = document.getElementById('hunter-pass').value;
 
-        function confirmScan() {
-            playSfx('scan');
-            const overlay = document.getElementById('sync-overlay');
-            const fill = document.getElementById('sync-fill');
-            overlay.classList.add('active');
-            setTimeout(() => { fill.style.width = '100%'; }, 100);
-            setTimeout(() => {
-                document.getElementById('goal-screen').classList.add('hidden');
-                overlay.classList.remove('active');
-                document.getElementById('main-hud').classList.remove('hidden');
-                document.getElementById('display-name').innerText = currentHunterName.toUpperCase();
-                load();
-                checkExistingTimer();
-            }, 2500); 
+    // 2. Vérification de sécurité
+    if (!id || !pass) {
+        alert("Accès refusé : Identifiant ou Passcode manquant.");
+        return;
+    }
+
+    // 3. Connexion Cloud (Le moteur de V1)
+    if (window.fbLogin) {
+        try {
+            // On attend que la connexion soit établie
+            await window.fbLogin(id, pass);
+            console.log("Système Neural connecté au Cloud.");
+        } catch (e) {
+            console.error("Erreur de liaison Cloud:", e);
+            alert("Erreur de connexion au serveur Hunter.");
+            return; // On arrête tout si la connexion échoue
         }
+    }
+
+    // 4. Ton design original : passage à l'écran suivant
+    currentHunterName = id;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('goal-screen').classList.remove('hidden');
+    if (cloudData) {
+    // 1. On synchronise la mémoire locale
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData));
+    console.log("Données Cloud récupérées avec succès.");
+
+    // 2. ON INJECTE L'IMAGE DANS L'INTERFACE
+    if (cloudData.avatar) {
+        // Dans l'aperçu du login
+        const loginPrev = document.getElementById('login-preview');
+        if (loginPrev) loginPrev.src = cloudData.avatar;
+
+        // Dans le HUD (le cercle en haut à gauche)
+        const hudAvatar = document.getElementById('avatar-hud');
+        if (hudAvatar) hudAvatar.src = cloudData.avatar;
+    }
+
+    // 3. On remet les chiffres (Taille/Poids)
+    if(cloudData.h) document.getElementById('u-height').value = cloudData.h;
+    if(cloudData.w) document.getElementById('u-weight').value = cloudData.w;
+    
+    // On relance save() pour recalculer l'IMC et les couleurs
+    save(); 
+}
+}
+
+
+    async function confirmScan() { // On ajoute 'async' ici aussi
+    playSfx('scan');
+    const overlay = document.getElementById('sync-overlay');
+    const fill = document.getElementById('sync-fill');
+    
+    overlay.classList.add('active');
+    fill.style.width = '100%';
+
+    // --- AJOUT CLOUD : On récupère les données pendant l'animation ---
+    if (window.cloudLoad) {
+        try {
+            const cloudData = await window.cloudLoad();
+            if (cloudData) {
+                // On met les données du Cloud dans la mémoire locale (STORAGE_KEY)
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData));
+                console.log("Données Cloud récupérées avec succès.");
+                if (cloudData.avatar) {
+            document.getElementById('login-preview').src = cloudData.avatar;
+            if(document.getElementById('avatar-hud')) {
+                document.getElementById('avatar-hud').src = cloudData.avatar;
+            }
+        
+        }
+            }
+        } catch (e) {
+            console.error("Erreur de récupération Cloud:", e);
+        }
+    }
+    // -------------------------------------------------------------
+
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        document.getElementById('goal-screen').classList.add('hidden');
+        document.getElementById('main-hud').classList.remove('hidden');
+        
+        // On affiche le nom en majuscules comme dans ton design
+        document.getElementById('display-name').innerText = currentHunterName.toUpperCase();
+        
+        load(); // Cette fonction va maintenant lire les données qu'on vient de télécharger
+        checkExistingTimer();
+    }, 2500); // On garde tes 2.5 secondes d'origine
+}
 
         function showSystemAlert(title, msg) {
             playSfx('alert');
@@ -388,15 +528,18 @@
         function closeAlert() { document.getElementById('system-alert').style.display = 'none'; }
 
         function previewLoginAvatar(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => { 
-                    document.getElementById('login-preview').src = e.target.result;
-                    document.getElementById('avatar-hud').src = e.target.result;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => { 
+            document.getElementById('login-preview').src = e.target.result;
+            document.getElementById('avatar-hud').src = e.target.result;
+            
+            // AJOUT ICI : On sauvegarde dès que l'image est chargée !
+            save(); 
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 
         function generateRandomMissions() {
             let shuffled = [...EXERCISES_POOL].sort(() => 0.5 - Math.random());
@@ -422,6 +565,7 @@
             dailyInterval = setInterval(() => {
                 let remaining = Math.floor((endTime - Date.now()) / 1000);
                 if (remaining <= 0) {
+                    
                     clearInterval(dailyInterval);
                     localStorage.removeItem(TIMER_KEY);
                     localStorage.removeItem(QUEST_KEY);
@@ -439,6 +583,7 @@
             const d = JSON.parse(localStorage.getItem(KEY));
             if(d) {
                 currentLvl = d.lvl || 1;
+
                 completed = d.completed || 0;
                 document.getElementById('u-age').value = d.age || "";
                 document.getElementById('u-height').value = d.h || "";
@@ -481,48 +626,35 @@
             document.getElementById('xp-fill-session').style.width = pc + "%";
             document.getElementById('session-pc').innerText = pc + "%";
         }
-
+        
+        
+        const STORAGE_KEY = 'hunter_system_save';
         function save() {
-            const h = parseFloat(document.getElementById('u-height').value) || 0;
-            const w = parseFloat(document.getElementById('u-weight').value) || 0;
-            
-            // --- NOUVELLE LOGIQUE IMC AVEC COULEURS ---
-            if(h > 0) {
-                const imc = (w / ((h/100)**2)).toFixed(1);
-                const imcEl = document.getElementById('u-imc');
-                imcEl.innerText = imc;
-                
-                // On retire les anciennes couleurs avant d'appliquer la nouvelle
-                imcEl.classList.remove('imc-normal', 'imc-warning', 'imc-alert');
-                
-                // Application de la couleur selon la zone de santé
-                if(imc >= 18.5 && imc <= 25) {
-                    imcEl.classList.add('imc-normal');  // VERT : Santé optimale
-                } else if(imc > 25) {
-                    imcEl.classList.add('imc-warning'); // ROUGE : Surpoids / Alerte
-                } else {
-                    imcEl.classList.add('imc-alert');   // OR : Sous-poids
-                }
-            }
+    const h = parseFloat(document.getElementById('u-height').value) || 0;
+    const w = parseFloat(document.getElementById('u-weight').value) || 0;
+    const sex = document.getElementById('u-sex').value;
+    const imcElement = document.getElementById('u-imc');
 
-            // --- SAUVEGARDE DES DONNÉES ---
-            try {
-                const data = { 
-                    lvl: currentLvl, 
-                    age: document.getElementById('u-age').value, 
-                    h: h, 
-                    w: w, 
-                    sex: document.getElementById('u-sex').value, 
-                    avatar: document.getElementById('avatar-hud').src, 
-                    completed: completed 
-                };
-                localStorage.setItem(KEY, JSON.stringify(data));
-            } catch(e) { 
-                console.error("Storage full"); 
-            }
-            
-            updateRankVisuals();
-        }
+    if (h > 0 && imcElement) {
+        const imc = (w / ((h / 100) ** 2)).toFixed(1);
+        imcElement.innerText = imc;
+        imcElement.style.color = (imc >= 18.5 && imc <= 25) ? "#00ff88" : "#ff4444";
+    }
+
+    // Préparation des données uniques
+    const data = {
+        lvl: typeof currentLvl !== 'undefined' ? currentLvl : 1,
+        h: h,
+        w: w,
+        sex: sex,
+        avatar: document.getElementById('login-preview').src,
+        completed: typeof completed !== 'undefined' ? completed : 0,
+        lastUpdate: new Date().getTime()
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    if (window.cloudSave) window.cloudSave(data);
+}
 
         function initMissions(reveal) {
     const container = document.getElementById('mission-container');
