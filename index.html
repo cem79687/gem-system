@@ -63,32 +63,6 @@ window.cloudLoad = async () => {
     }
     return null;
 };
-// --- ÉCOUTE DES STATS EN TEMPS RÉEL ---
-// Cette fonction surveille les changements dans ta base de données
-import { onSnapshot } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        onSnapshot(doc(db, "hunters", user.uid), (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                
-                // Si tu as des éléments avec ces IDs, ils se mettront à jour tout seuls
-                if(document.getElementById('hp-val')) {
-                    const hpPercent = (data.hp / data.hpMax) * 100;
-                    document.getElementById('hp-val').innerText = `${data.hp} / ${data.hpMax}`;
-                    document.getElementById('hp-bar').style.width = hpPercent + "%";
-                }
-                
-                if(document.getElementById('mp-val')) {
-                    const mpPercent = (data.mp / data.mpMax) * 100;
-                    document.getElementById('mp-val').innerText = `${data.mp} / ${data.mpMax}`;
-                    document.getElementById('mp-bar').style.width = mpPercent + "%";
-                }
-            }
-        });
-    }
-});
     </script>
 
     <meta charset="UTF-8">
@@ -193,81 +167,63 @@ auth.onAuthStateChanged((user) => {
         .sync-bar-fill { width: 0%; height: 100%; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); transition: width 2s ease-in-out; }
 
         /* BLOC BOUTON SYSTEM LATÉRAL */
-      /* --- LE BOUTON SYSTEM --- */
-/* LE BOUTON : Verrouillé sur le bord droit */
-.system-trigger {
+        .system-trigger {
     position: absolute;
-    /* On le colle au bord droit de ton interface */
-    right: -30px; 
-    top: 50%;
-    transform: translateY(-50%);
+    right: -35px;
+    top: 40%;
     
-    background: rgba(0, 255, 255, 0.1);
-    border: 1px solid #00f2ff;
-    color: #00f2ff;
-    padding: 15px 5px;
-    writing-mode: vertical-rl;
+    background: rgba(0, 150, 255, 0.1);
+    backdrop-filter: blur(4px);
+    color: #00d2ff;
+    padding: 20px 8px;
+    width: 32px;
+    
+    /* Forme trapèze épurée */
+    clip-path: polygon(0% 0%, 80% 10%, 100% 10%, 100% 90%, 80% 90%, 0% 100%);
+    
+    /* Bordure électrique fine */
+    border-left: 2px solid #00d2ff;
     cursor: pointer;
-    z-index: 100;
-    
-    font-family: 'Orbitron', sans-serif;
+    writing-mode: vertical-lr;
+    font-family: 'Orbitron';
     font-size: 11px;
-    letter-spacing: 2px;
-    border-radius: 0 5px 5px 0;
-    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-    transition: all 0.3s ease;
+    font-weight: 900;
+    letter-spacing: 3px;
+    
+    /* Lueur bleue électrique */
+    box-shadow: -5px 0 15px rgba(0, 210, 255, 0.4);
+    text-shadow: 0 0 8px #00d2ff;
+    
+    z-index: 5000;
+    transition: 0.3s;
+    
+    /* Animation de micro-décharges */
+    animation: electricGlow 3s infinite alternate;
 }
 
-/* 📱 Correction spécifique pour Mobile */
-@media (max-width: 768px) {
-    .system-trigger {
-        right: 0; /* Sur iPhone, on le recolle au bord de l'écran */
-        padding: 10px 3px;
-        font-size: 10px;
-    }
+@keyframes electricGlow {
+    0%, 100% { opacity: 0.8; filter: brightness(1); }
+    92% { opacity: 1; filter: brightness(1.2); }
+    94% { opacity: 0.9; filter: brightness(2) drop-shadow(0 0 2px #fff); }
+    96% { opacity: 1; filter: brightness(1.5); }
 }
-
-.system-trigger:hover {
-    background: rgba(0, 242, 255, 0.3);
-    padding-right: 12px; /* Petit effet au survol */
-}
-
-/* LE PANNEAU : Adaptation Universelle */
-#system-panel {
-    position: fixed;
-    top: 0;
-    right: -100%; /* Caché par défaut */
-    width: 500px;  /* Largeur sur PC */
-    height: 100vh;
-    background: rgba(10, 2, 2, 0.98);
-    backdrop-filter: blur(20px);
-    z-index: 9999;
-    transition: right 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    overflow-y: auto;
-}
-
-/* 📱 MOBILE : On force le plein écran uniquement sur petits écrans */
-@media (max-width: 768px) {
-    #system-panel {
-        width: 100vw; /* Prend tout l'écran sur iPhone */
-    }
-}
-
-#system-panel.open {
-    right: 0; /* S'ouvre sur l'écran */
-}
-
-/* On ajoute une bordure lumineuse à gauche pour le style */
-#system-panel::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 2px;
-    height: 100%;
-    background: var(--system-red);
-    box-shadow: 0 0 15px var(--system-red);
-}
+        /* PANNEAU SYSTÈME COULISSANT */
+        #system-panel {
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 9, 14, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 3000;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px;
+            border-radius: 40px;
+            border-left: 2px solid var(--system-red);
+            display: none;
+        }
+        #system-panel.open { right: 0; }
         /* --- ÉTAT DE VEILLE DU SYSTÈME --- */
         .system-sleep {
             background: rgba(255, 61, 61, 0.05) !important;
@@ -431,58 +387,19 @@ auth.onAuthStateChanged((user) => {
         <div id="hud-container">
             
             <div class="system-trigger" onclick="toggleSystemPanel()">SYSTEM</div>
-        <div id="system-panel">
-    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: var(--system-red); font-family: 'Orbitron'; font-size: 14px; letter-spacing: 2px;">SYSTEM_INTERFACE</span>
-        <button onclick="toggleSystemPanel()" style="background: rgba(255,0,0,0.1); border: 1px solid var(--system-red); color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px;">
-            ✕ CLOSE
-        </button>
-    </div>
+            <div id="system-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h2 style="font-family:'Orbitron'; color:var(--system-red); font-size:18px;">SYSTEM MENU</h2>
+                    <div onclick="toggleSystemPanel()" style="cursor:pointer; color:var(--text-muted); font-size:20px;">✕</div>
+                </div>
+                <div style="color:var(--text-muted); font-family:'JetBrains Mono'; font-size:12px;">
+                    <p>[ INITIALISATION DES PARAMÈTRES... ]</p>
+                    <div style="margin-top:20px; padding:15px; border:1px solid rgba(255,61,61,0.2); border-radius:10px;">
+                        En attente de données supplémentaires...
+                    </div>
+                </div>
+            </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 20px; text-align: center;">
-        
-        <div style="width: 250px; height: 250px; position: relative; margin-bottom: 30px;">
-            <div style="position: absolute; width: 100%; height: 100%; border: 2px solid var(--system-red); border-radius: 50%; box-shadow: 0 0 30px rgba(255,0,0,0.3); animation: pulse 2s infinite;"></div>
-            <img src="ton-avatar.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Avatar">
-        </div>
-
-        <h2 style="color: white; font-family: 'Orbitron'; font-size: 32px; margin: 0;">GEM</h2>
-        <p style="color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 14px; margin-top: 10px;">LEVEL 1 | SHADOW MONARCH</p>
-        
-        <div id="mobile-stats-container" style="width: 100%; max-width: 350px; margin-top: 30px; display: flex; flex-direction: column; gap: 20px;">
-    
-    <div class="stat-group">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Orbitron';">
-            <span style="color: #ff4444; font-size: 14px; letter-spacing: 2px; font-weight: bold;">HP</span>
-            <span id="hp-val" style="color: white; font-size: 12px;">-- / --</span>
-        </div>
-        <div style="width: 100%; height: 10px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.3); border-radius: 5px; overflow: hidden; position: relative;">
-            <div id="hp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ff0000, #ff6666); box-shadow: 0 0 15px #ff4444; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-        </div>
-    </div>
-
-    <div class="stat-group">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Orbitron';">
-            <span style="color: #00f2ff; font-size: 14px; letter-spacing: 2px; font-weight: bold;">MP</span>
-            <span id="mp-val" style="color: white; font-size: 12px;">-- / --</span>
-        </div>
-        <div style="width: 100%; height: 10px; background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.3); border-radius: 5px; overflow: hidden; position: relative;">
-            <div id="mp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); box-shadow: 0 0 15px #00f2ff; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-           
-           
-           
-           
-           
-           
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-shrink: 0;">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
@@ -917,30 +834,6 @@ function completeQuest(el) {
                 }
             }, 1000);
         }
-        import { onSnapshot } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
-
-// Cette fonction écoute les changements en temps réel
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        onSnapshot(doc(db, "hunters", user.uid), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                
-                // Mise à jour HP
-                const hpPercent = (data.hp / data.hpMax) * 100;
-                document.getElementById('hp-val').innerText = `${data.hp} / ${data.hpMax}`;
-                document.getElementById('hp-bar').style.width = hpPercent + "%";
-                
-                // Mise à jour MP
-                const mpPercent = (data.mp / data.mpMax) * 100;
-                document.getElementById('mp-val').innerText = `${data.mp} / ${data.mpMax}`;
-                document.getElementById('mp-bar').style.width = mpPercent + "%";
-                
-                console.log("Stats synchronisées avec le Cloud !");
-            }
-        });
-    }
-});
     </script>
 </body>
 </html>
