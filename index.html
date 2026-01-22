@@ -63,6 +63,32 @@ window.cloudLoad = async () => {
     }
     return null;
 };
+// --- ÉCOUTE DES STATS EN TEMPS RÉEL ---
+// Cette fonction surveille les changements dans ta base de données
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        onSnapshot(doc(db, "hunters", user.uid), (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                
+                // Si tu as des éléments avec ces IDs, ils se mettront à jour tout seuls
+                if(document.getElementById('hp-val')) {
+                    const hpPercent = (data.hp / data.hpMax) * 100;
+                    document.getElementById('hp-val').innerText = `${data.hp} / ${data.hpMax}`;
+                    document.getElementById('hp-bar').style.width = hpPercent + "%";
+                }
+                
+                if(document.getElementById('mp-val')) {
+                    const mpPercent = (data.mp / data.mpMax) * 100;
+                    document.getElementById('mp-val').innerText = `${data.mp} / ${data.mpMax}`;
+                    document.getElementById('mp-bar').style.width = mpPercent + "%";
+                }
+            }
+        });
+    }
+});
     </script>
 
     <meta charset="UTF-8">
@@ -423,12 +449,28 @@ window.cloudLoad = async () => {
         <h2 style="color: white; font-family: 'Orbitron'; font-size: 32px; margin: 0;">GEM</h2>
         <p style="color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 14px; margin-top: 10px;">LEVEL 1 | SHADOW MONARCH</p>
         
-        <div id="mobile-stats-container" style="width: 100%; max-width: 300px; margin-top: 40px;">
-            </div>
+        <div id="mobile-stats-container" style="width: 100%; max-width: 350px; margin-top: 30px; display: flex; flex-direction: column; gap: 20px;">
+    
+    <div class="stat-group">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Orbitron';">
+            <span style="color: #ff4444; font-size: 14px; letter-spacing: 2px; font-weight: bold;">HP</span>
+            <span id="hp-val" style="color: white; font-size: 12px;">-- / --</span>
+        </div>
+        <div style="width: 100%; height: 10px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.3); border-radius: 5px; overflow: hidden; position: relative;">
+            <div id="hp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ff0000, #ff6666); box-shadow: 0 0 15px #ff4444; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+        </div>
+    </div>
+
+    <div class="stat-group">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Orbitron';">
+            <span style="color: #00f2ff; font-size: 14px; letter-spacing: 2px; font-weight: bold;">MP</span>
+            <span id="mp-val" style="color: white; font-size: 12px;">-- / --</span>
+        </div>
+        <div style="width: 100%; height: 10px; background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.3); border-radius: 5px; overflow: hidden; position: relative;">
+            <div id="mp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); box-shadow: 0 0 15px #00f2ff; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+        </div>
     </div>
 </div>
-           
-
 
 
 
@@ -875,6 +917,30 @@ function completeQuest(el) {
                 }
             }, 1000);
         }
+        import { onSnapshot } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+// Cette fonction écoute les changements en temps réel
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        onSnapshot(doc(db, "hunters", user.uid), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                // Mise à jour HP
+                const hpPercent = (data.hp / data.hpMax) * 100;
+                document.getElementById('hp-val').innerText = `${data.hp} / ${data.hpMax}`;
+                document.getElementById('hp-bar').style.width = hpPercent + "%";
+                
+                // Mise à jour MP
+                const mpPercent = (data.mp / data.mpMax) * 100;
+                document.getElementById('mp-val').innerText = `${data.mp} / ${data.mpMax}`;
+                document.getElementById('mp-bar').style.width = mpPercent + "%";
+                
+                console.log("Stats synchronisées avec le Cloud !");
+            }
+        });
+    }
+});
     </script>
 </body>
 </html>
