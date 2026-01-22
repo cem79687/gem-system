@@ -116,7 +116,7 @@ window.cloudLoad = async () => {
             background: var(--panel-bg); border-radius: 40px;
             padding: 25px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex; flex-direction: column; 
-            overflow: hidden; 
+            overflow: visible; 
         }
 
         #btn-accept {
@@ -168,43 +168,80 @@ window.cloudLoad = async () => {
 
         /* BLOC BOUTON SYSTEM LATÉRAL */
         .system-trigger {
-            position: absolute;
-            right: -30px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(90deg, #ff3d3d, #8b0000);
-            padding: 15px 5px;
-            border-radius: 0 8px 8px 0;
-            cursor: pointer;
-            writing-mode: vertical-lr;
-            font-family: 'Orbitron';
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            color: #fff;
-            box-shadow: 5px 0 15px rgba(255, 61, 61, 0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            z-index: 2000;
-            transition: 0.3s;
-        }
-        .system-trigger:hover { right: -35px; background: #ff3d3d; }
+    position: absolute;
+    right: -35px;
+    top: 40%;
+    
+    background: rgba(0, 150, 255, 0.1);
+    backdrop-filter: blur(4px);
+    color: #00d2ff;
+    padding: 20px 8px;
+    width: 32px;
+    
+    /* Forme trapèze épurée */
+    clip-path: polygon(0% 0%, 80% 10%, 100% 10%, 100% 90%, 80% 90%, 0% 100%);
+    
+    /* Bordure électrique fine */
+    border-left: 2px solid #00d2ff;
+    cursor: pointer;
+    writing-mode: vertical-lr;
+    font-family: 'Orbitron';
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    
+    /* Lueur bleue électrique */
+    box-shadow: -5px 0 15px rgba(0, 210, 255, 0.4);
+    text-shadow: 0 0 8px #00d2ff;
+    
+    z-index: 5000;
+    transition: 0.3s;
+    
+    /* Animation de micro-décharges */
+    animation: electricGlow 3s infinite alternate;
+}
 
-        /* PANNEAU SYSTÈME COULISSANT */
-        #system-panel {
-            position: absolute;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(7, 9, 14, 0.98);
-            backdrop-filter: blur(15px);
-            z-index: 3000;
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 30px;
-            border-radius: 40px;
-            border-left: 2px solid var(--system-red);
-        }
-        #system-panel.open { right: 0; }
+@keyframes electricGlow {
+    0%, 100% { opacity: 0.8; filter: brightness(1); }
+    92% { opacity: 1; filter: brightness(1.2); }
+    94% { opacity: 0.9; filter: brightness(2) drop-shadow(0 0 2px #fff); }
+    96% { opacity: 1; filter: brightness(1.5); }
+}
+
+
+#system-panel {
+    position: absolute;
+    top: 50%;
+    /* On l'ancre juste à droite de ton bouton SYSTEM */
+    left: calc(100% + 10px); 
+    transform: translateY(-50%);
+    
+    /* ÉTAT FERMÉ : Largeur nulle et invisible */
+    width: 0;
+    height: 80vh;
+    opacity: 0;
+    overflow: hidden;
+    
+    background: linear-gradient(135deg, rgba(15, 2, 2, 0.98), rgba(5, 5, 5, 1));
+    backdrop-filter: blur(20px);
+    z-index: 10000;
+    
+    padding: 0;
+    border-radius: 20px;
+    border: 2px solid var(--system-red);
+    box-shadow: 15px 0 40px rgba(255, 0, 0, 0.2);
+    
+    /* Animation de glisse latérale vers la droite */
+    transition: width 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s;
+    display: block !important;
+}
+
+/* ÉTAT OUVERT : Il se déploie vers la droite */
+#system-panel.open {
+    width: 550px; /* Sa largeur finale dans l'espace vide */
+    opacity: 1;
+    
+}
         /* --- ÉTAT DE VEILLE DU SYSTÈME --- */
         .system-sleep {
             background: rgba(255, 61, 61, 0.05) !important;
@@ -230,6 +267,70 @@ window.cloudLoad = async () => {
         .imc-normal { color: var(--system-green) !important; text-shadow: 0 0 10px var(--system-green); }
         .imc-warning { color: var(--system-red) !important; text-shadow: 0 0 10px var(--system-red); }
         .imc-alert { color: var(--recovery-gold) !important; text-shadow: 0 0 10px var(--recovery-gold); }
+    
+    /* Animation de pulsation lumineuse */
+@keyframes monarch-glow {
+    0% {
+        filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.6));
+        transform: scale(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(0, 191, 255, 1));
+        transform: scale(1.02); /* Très léger grossissement */
+    }
+    100% {
+        filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.6));
+        transform: scale(1);
+    }
+}
+
+/* Application au logo de connexion */
+.ai-logo-selector-locked { 
+    width: 100px; height: 100px; 
+    margin: 0 auto 30px; 
+    display: flex; align-items: center; justify-content: center; 
+    position: relative;
+}
+
+#login-preview {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+    animation: monarch-glow 3s infinite ease-in-out;
+    pointer-events: none; /* Verrouille le clic */
+    user-select: none;
+}
+
+
+#login-preview {
+    width: 100px; /* Ajuste selon tes besoins */
+    height: 100px;
+    object-fit: cover;
+    border-radius: 20px; /* Pour arrondir si besoin */
+    animation: monarch-glow 3s infinite ease-in-out;
+    margin-bottom: 10px;
+    pointer-events: none;    /* Rend l'image "invisible" aux clics */
+    user-select: none;       /* Empêche de sélectionner l'image */
+    -webkit-user-drag: none; /* Empêche de faire glisser l'image */
+    cursor:default;
+}
+   
+#avatar-hud {
+    width: 80px;      /* Ou la taille que tu as actuellement */
+    height: 80px;     /* Garde une largeur et hauteur identique pour un cercle */
+    border-radius: 50%; /* Pour un rendu circulaire comme dans Solo Leveling */
+    object-fit: cover;  /* <--- C'EST CETTE LIGNE QUI FAIT TOUT */
+    object-position: center; /* Centre la photo si elle est coupée */
+    border: 2px solid var(--system-blue);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#avatar-hud:hover {
+    transform: scale(1.05); /* Petit effet de zoom quand on passe la souris */
+}
+
+
     </style>
 </head>
 <body>
@@ -242,8 +343,8 @@ window.cloudLoad = async () => {
 
     <div id="login-screen" class="login-container">
         <div class="login-card">
-            <div class="ai-logo-selector" onclick="document.getElementById('avatar-input').click()">
-               <img id="login-preview" src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+            <div class="ai-logo-selector-locked">
+               <img id="login-preview" src="img/monarch.png" alt="">
             </div>
             <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="previewLoginAvatar(this)">
             <div class="input-group"><label>Identifier</label><input type="text" id="hunter-id" class="neural-input" placeholder="Hunter Name..."></div>
@@ -304,23 +405,48 @@ window.cloudLoad = async () => {
         <div id="hud-container">
             
             <div class="system-trigger" onclick="toggleSystemPanel()">SYSTEM</div>
-            <div id="system-panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                    <h2 style="font-family:'Orbitron'; color:var(--system-red); font-size:18px;">SYSTEM MENU</h2>
-                    <div onclick="toggleSystemPanel()" style="cursor:pointer; color:var(--text-muted); font-size:20px;">✕</div>
-                </div>
-                <div style="color:var(--text-muted); font-family:'JetBrains Mono'; font-size:12px;">
-                    <p>[ INITIALISATION DES PARAMÈTRES... ]</p>
-                    <div style="margin-top:20px; padding:15px; border:1px solid rgba(255,61,61,0.2); border-radius:10px;">
-                        En attente de données supplémentaires...
-                    </div>
-                </div>
-            </div>
+        <div id="system-panel">
+    <div style="display: flex; justify-content: flex-end; padding: 20px;">
+        <button onclick="toggleSystemPanel()" style="background: rgba(255,0,0,0.1); border: 1px solid var(--system-red); color: white; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px;">
+            ✕ RETOUR HUD
+        </button>
+    </div>
 
+    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0 30px;">
+        
+        <div id="avatar-3d-container" style="width: 100%; height: 350px; background: radial-gradient(circle, rgba(255,0,0,0.05) 0%, transparent 70%); border-radius: 15px; position: relative; display: flex; justify-content: center; align-items: center;">
+            
+            <img src="ton-image-3d.png" style="height: 110%; filter: drop-shadow(0 0 15px rgba(255,0,0,0.3));" alt="3D AVATAR">
+            
+            <div style="position: absolute; bottom: 10%; width: 200px; height: 20px; background: rgba(255,0,0,0.1); filter: blur(10px); border-radius: 50%;"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <h2 style="color: white; font-family: 'Orbitron'; margin: 0; font-size: 24px; letter-spacing: 4px; text-shadow: 0 0 10px rgba(255,0,0,0.5);">GEM</h2>
+            <div style="color: var(--system-red); font-family: 'Orbitron'; font-size: 14px; margin-top: 5px; font-weight: bold;">LEVEL 1 | SHADOW MONARCH</div>
+        </div>
+    </div>
+</div>
+
+
+           
+
+
+
+
+
+
+
+           
+           
+           
+           
+           
+           
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-shrink: 0;">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <div style="width:70px; height:70px; border-radius:50%; border:2px solid var(--solo-cyan); overflow:hidden; background:#111;">
-                        <img id="avatar-hud" src="" style="width:100%; height:100%; object-fit:cover;">
+                        <img id="avatar-hud" src="img/avatar-default.png" alt="Avatar" onclick="document.getElementById('avatar-input').click()" style="cursor: pointer;">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-start; margin-top: 5px;">
                         <div style="font-family:'Orbitron'; font-size:10px; color:var(--solo-cyan); letter-spacing:1px; margin-bottom: 2px;">
@@ -531,7 +657,7 @@ window.cloudLoad = async () => {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = (e) => { 
-            document.getElementById('login-preview').src = e.target.result;
+           //;
             document.getElementById('avatar-hud').src = e.target.result;
             
             // AJOUT ICI : On sauvegarde dès que l'image est chargée !
@@ -629,7 +755,7 @@ window.cloudLoad = async () => {
         
         
         const STORAGE_KEY = 'hunter_system_save';
-        function save() {
+       function save() {
     const h = parseFloat(document.getElementById('u-height').value) || 0;
     const w = parseFloat(document.getElementById('u-weight').value) || 0;
     const sex = document.getElementById('u-sex').value;
@@ -641,13 +767,14 @@ window.cloudLoad = async () => {
         imcElement.style.color = (imc >= 18.5 && imc <= 25) ? "#00ff88" : "#ff4444";
     }
 
-    // Préparation des données uniques
+    // --- LA CORRECTION EST ICI ---
     const data = {
         lvl: typeof currentLvl !== 'undefined' ? currentLvl : 1,
         h: h,
         w: w,
         sex: sex,
-        avatar: document.getElementById('login-preview').src,
+        // On enregistre l'image du HUD (ta photo), PAS le login-preview
+        avatar: document.getElementById('avatar-hud').src, 
         completed: typeof completed !== 'undefined' ? completed : 0,
         lastUpdate: new Date().getTime()
     };
