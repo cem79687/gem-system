@@ -168,59 +168,67 @@ window.cloudLoad = async () => {
 
         /* BLOC BOUTON SYSTEM LATÉRAL */
       /* --- LE BOUTON SYSTEM --- */
+/* LE BOUTON : Verrouillé sur le bord droit */
 .system-trigger {
-    position: fixed;
-    right: 0;
+    position: absolute;
+    /* On le colle au bord droit de ton interface */
+    right: -30px; 
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 255, 255, 0.2);
+    
+    background: rgba(0, 255, 255, 0.1);
     border: 1px solid #00f2ff;
     color: #00f2ff;
-    padding: 20px 5px;
-    writing-mode: vertical-rl; /* Texte vertical */
+    padding: 15px 5px;
+    writing-mode: vertical-rl;
     cursor: pointer;
-    z-index: 1000;
-    border-radius: 5px 0 0 5px;
+    z-index: 100;
+    
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    transition: all 0.3s;
+    font-size: 11px;
+    letter-spacing: 2px;
+    border-radius: 0 5px 5px 0;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+    transition: all 0.3s ease;
 }
 
-/* --- LE PANNEAU (MODE PAR DÉFAUT / PC) --- */
+/* 📱 Correction spécifique pour Mobile */
+@media (max-width: 768px) {
+    .system-trigger {
+        right: 0; /* Sur iPhone, on le recolle au bord de l'écran */
+        padding: 10px 3px;
+        font-size: 10px;
+    }
+}
+
+.system-trigger:hover {
+    background: rgba(0, 242, 255, 0.3);
+    padding-right: 12px; /* Petit effet au survol */
+}
+
+/* LE PANNEAU : Adaptation Universelle */
 #system-panel {
     position: fixed;
     top: 0;
-    right: -100%; /* Caché à droite */
-    width: 550px;
+    right: -100%; /* Caché par défaut */
+    width: 500px;  /* Largeur sur PC */
     height: 100vh;
-    background: rgba(10, 2, 2, 0.95);
-    backdrop-filter: blur(15px);
-    border-left: 2px solid var(--system-red);
-    transition: right 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    background: rgba(10, 2, 2, 0.98);
+    backdrop-filter: blur(20px);
     z-index: 9999;
+    transition: right 0.5s cubic-bezier(0.19, 1, 0.22, 1);
     overflow-y: auto;
 }
 
-#system-panel.open {
-    right: 0; /* Glisse vers l'intérieur */
+/* 📱 MOBILE : On force le plein écran uniquement sur petits écrans */
+@media (max-width: 768px) {
+    #system-panel {
+        width: 100vw; /* Prend tout l'écran sur iPhone */
+    }
 }
 
-/* 📱 --- ADAPTATION MOBILE (iPhone, etc.) --- */
-@media (max-width: 768px) {
-    .system-trigger {
-        padding: 15px 3px; /* Plus petit sur iPhone */
-        font-size: 10px;
-    }
-
-    #system-panel {
-        width: 100%; /* Prend tout l'écran sur mobile */
-        right: -100%;
-        border-left: none;
-    }
-    
-    #system-panel.open {
-        right: 0;
-    }
+#system-panel.open {
+    right: 0; /* S'ouvre sur l'écran */
 }
 
 /* On ajoute une bordure lumineuse à gauche pour le style */
