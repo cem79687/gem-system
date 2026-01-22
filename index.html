@@ -167,68 +167,60 @@ window.cloudLoad = async () => {
         .sync-bar-fill { width: 0%; height: 100%; background: var(--solo-cyan); box-shadow: 0 0 15px var(--solo-cyan); transition: width 2s ease-in-out; }
 
         /* BLOC BOUTON SYSTEM LATÉRAL */
-        .system-trigger {
-    position: absolute;
-    right: -35px;
-    top: 40%;
-    
-    background: rgba(0, 150, 255, 0.1);
-    backdrop-filter: blur(4px);
-    color: #00d2ff;
-    padding: 20px 8px;
-    width: 32px;
-    
-    /* Forme trapèze épurée */
-    clip-path: polygon(0% 0%, 80% 10%, 100% 10%, 100% 90%, 80% 90%, 0% 100%);
-    
-    /* Bordure électrique fine */
-    border-left: 2px solid #00d2ff;
+      /* --- LE BOUTON SYSTEM --- */
+.system-trigger {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 255, 255, 0.2);
+    border: 1px solid #00f2ff;
+    color: #00f2ff;
+    padding: 20px 5px;
+    writing-mode: vertical-rl; /* Texte vertical */
     cursor: pointer;
-    writing-mode: vertical-lr;
-    font-family: 'Orbitron';
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    
-    /* Lueur bleue électrique */
-    box-shadow: -5px 0 15px rgba(0, 210, 255, 0.4);
-    text-shadow: 0 0 8px #00d2ff;
-    
-    z-index: 5000;
-    transition: 0.3s;
-    
-    /* Animation de micro-décharges */
-    animation: electricGlow 3s infinite alternate;
+    z-index: 1000;
+    border-radius: 5px 0 0 5px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    transition: all 0.3s;
 }
 
-@keyframes electricGlow {
-    0%, 100% { opacity: 0.8; filter: brightness(1); }
-    92% { opacity: 1; filter: brightness(1.2); }
-    94% { opacity: 0.9; filter: brightness(2) drop-shadow(0 0 2px #fff); }
-    96% { opacity: 1; filter: brightness(1.5); }
-}
-
-
+/* --- LE PANNEAU (MODE PAR DÉFAUT / PC) --- */
 #system-panel {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100vw;  /* 100% de la largeur de l'écran */
-    height: 100vh; /* 100% de la hauteur de l'écran */
-    background: rgba(10, 2, 2, 0.98); /* Fond sombre pour bien voir l'avatar */
-    backdrop-filter: blur(20px);
+    right: -100%; /* Caché à droite */
+    width: 550px;
+    height: 100vh;
+    background: rgba(10, 2, 2, 0.95);
+    backdrop-filter: blur(15px);
+    border-left: 2px solid var(--system-red);
+    transition: right 0.5s cubic-bezier(0.19, 1, 0.22, 1);
     z-index: 9999;
-    
-    /* Animation de glisse depuis la droite */
-    transform: translateX(100%); 
-    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    
-    display: flex;
-    flex-direction: column;
+    overflow-y: auto;
 }
 
 #system-panel.open {
-    transform: translateX(0); /* Le panneau glisse et couvre tout */
+    right: 0; /* Glisse vers l'intérieur */
+}
+
+/* 📱 --- ADAPTATION MOBILE (iPhone, etc.) --- */
+@media (max-width: 768px) {
+    .system-trigger {
+        padding: 15px 3px; /* Plus petit sur iPhone */
+        font-size: 10px;
+    }
+
+    #system-panel {
+        width: 100%; /* Prend tout l'écran sur mobile */
+        right: -100%;
+        border-left: none;
+    }
+    
+    #system-panel.open {
+        right: 0;
+    }
 }
 
 /* On ajoute une bordure lumineuse à gauche pour le style */
@@ -406,33 +398,27 @@ window.cloudLoad = async () => {
             
             <div class="system-trigger" onclick="toggleSystemPanel()">SYSTEM</div>
         <div id="system-panel">
-    <div style="width: 100%; padding: 30px; display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="color: white; font-family: 'Orbitron'; margin: 0; font-size: 20px; letter-spacing: 5px;">MENU SYSTEM</h1>
-        <button onclick="toggleSystemPanel()" style="background: rgba(255,0,0,0.1); border: 2px solid var(--system-red); color: white; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; text-transform: uppercase;">
-            ✕ RETOUR AU JEU
+    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--system-red); font-family: 'Orbitron'; font-size: 14px; letter-spacing: 2px;">SYSTEM_INTERFACE</span>
+        <button onclick="toggleSystemPanel()" style="background: rgba(255,0,0,0.1); border: 1px solid var(--system-red); color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px;">
+            ✕ CLOSE
         </button>
     </div>
 
-    <div style="flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 20px; gap: 50px;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 20px; text-align: center;">
         
-        <div id="avatar-section" style="flex: 1; min-width: 300px; max-width: 600px; display: flex; justify-content: center;">
-             <img src="ton-image-3d.png" style="max-height: 80vh; filter: drop-shadow(0 0 20px rgba(255,0,0,0.3));" alt="3D AVATAR">
+        <div style="width: 250px; height: 250px; position: relative; margin-bottom: 30px;">
+            <div style="position: absolute; width: 100%; height: 100%; border: 2px solid var(--system-red); border-radius: 50%; box-shadow: 0 0 30px rgba(255,0,0,0.3); animation: pulse 2s infinite;"></div>
+            <img src="ton-avatar.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Avatar">
         </div>
 
-        <div id="stats-section" style="flex: 1; min-width: 300px; max-width: 500px; display: flex; flex-direction: column; gap: 30px;">
-            <div style="border-left: 4px solid var(--system-red); padding-left: 20px;">
-                <h2 style="color: white; font-family: 'Orbitron'; margin: 0; font-size: 40px;">GEM</h2>
-                <p style="color: var(--system-red); font-family: 'Orbitron'; font-size: 16px; margin: 5px 0;">LEVEL 1 | SHADOW MONARCH</p>
+        <h2 style="color: white; font-family: 'Orbitron'; font-size: 32px; margin: 0;">GEM</h2>
+        <p style="color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 14px; margin-top: 10px;">LEVEL 1 | SHADOW MONARCH</p>
+        
+        <div id="mobile-stats-container" style="width: 100%; max-width: 300px; margin-top: 40px;">
             </div>
-            
-            <div id="ui-bars-placeholder" style="color: rgba(255,255,255,0.3); font-style: italic;">
-                [Emplacement des Stats...]
-            </div>
-        </div>
-
     </div>
 </div>
-
            
 
 
