@@ -210,37 +210,37 @@ window.cloudLoad = async () => {
 
 
 #system-panel {
-    position: absolute;
-    top: 50%;
-    /* On l'ancre juste à droite de ton bouton SYSTEM */
-    left: calc(100% + 10px); 
-    transform: translateY(-50%);
-    
-    /* ÉTAT FERMÉ : Largeur nulle et invisible */
-    width: 0;
-    height: 80vh;
-    opacity: 0;
-    overflow: hidden;
-    
-    background: linear-gradient(135deg, rgba(15, 2, 2, 0.98), rgba(5, 5, 5, 1));
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;  /* 100% de la largeur de l'écran */
+    height: 100vh; /* 100% de la hauteur de l'écran */
+    background: rgba(10, 2, 2, 0.98); /* Fond sombre pour bien voir l'avatar */
     backdrop-filter: blur(20px);
-    z-index: 10000;
+    z-index: 9999;
     
-    padding: 0;
-    border-radius: 20px;
-    border: 2px solid var(--system-red);
-    box-shadow: 15px 0 40px rgba(255, 0, 0, 0.2);
+    /* Animation de glisse depuis la droite */
+    transform: translateX(100%); 
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
     
-    /* Animation de glisse latérale vers la droite */
-    transition: width 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s;
-    display: block !important;
+    display: flex;
+    flex-direction: column;
 }
 
-/* ÉTAT OUVERT : Il se déploie vers la droite */
 #system-panel.open {
-    width: 550px; /* Sa largeur finale dans l'espace vide */
-    opacity: 1;
-    
+    transform: translateX(0); /* Le panneau glisse et couvre tout */
+}
+
+/* On ajoute une bordure lumineuse à gauche pour le style */
+#system-panel::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--system-red);
+    box-shadow: 0 0 15px var(--system-red);
 }
         /* --- ÉTAT DE VEILLE DU SYSTÈME --- */
         .system-sleep {
@@ -406,28 +406,32 @@ window.cloudLoad = async () => {
             
             <div class="system-trigger" onclick="toggleSystemPanel()">SYSTEM</div>
         <div id="system-panel">
-    <div style="display: flex; justify-content: flex-end; padding: 20px;">
-        <button onclick="toggleSystemPanel()" style="background: rgba(255,0,0,0.1); border: 1px solid var(--system-red); color: white; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px;">
-            ✕ RETOUR HUD
+    <div style="width: 100%; padding: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="color: white; font-family: 'Orbitron'; margin: 0; font-size: 20px; letter-spacing: 5px;">MENU SYSTEM</h1>
+        <button onclick="toggleSystemPanel()" style="background: rgba(255,0,0,0.1); border: 2px solid var(--system-red); color: white; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; text-transform: uppercase;">
+            ✕ RETOUR AU JEU
         </button>
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0 30px;">
+    <div style="flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 20px; gap: 50px;">
         
-        <div id="avatar-3d-container" style="width: 100%; height: 350px; background: radial-gradient(circle, rgba(255,0,0,0.05) 0%, transparent 70%); border-radius: 15px; position: relative; display: flex; justify-content: center; align-items: center;">
-            
-            <img src="ton-image-3d.png" style="height: 110%; filter: drop-shadow(0 0 15px rgba(255,0,0,0.3));" alt="3D AVATAR">
-            
-            <div style="position: absolute; bottom: 10%; width: 200px; height: 20px; background: rgba(255,0,0,0.1); filter: blur(10px); border-radius: 50%;"></div>
+        <div id="avatar-section" style="flex: 1; min-width: 300px; max-width: 600px; display: flex; justify-content: center;">
+             <img src="ton-image-3d.png" style="max-height: 80vh; filter: drop-shadow(0 0 20px rgba(255,0,0,0.3));" alt="3D AVATAR">
         </div>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <h2 style="color: white; font-family: 'Orbitron'; margin: 0; font-size: 24px; letter-spacing: 4px; text-shadow: 0 0 10px rgba(255,0,0,0.5);">GEM</h2>
-            <div style="color: var(--system-red); font-family: 'Orbitron'; font-size: 14px; margin-top: 5px; font-weight: bold;">LEVEL 1 | SHADOW MONARCH</div>
+        <div id="stats-section" style="flex: 1; min-width: 300px; max-width: 500px; display: flex; flex-direction: column; gap: 30px;">
+            <div style="border-left: 4px solid var(--system-red); padding-left: 20px;">
+                <h2 style="color: white; font-family: 'Orbitron'; margin: 0; font-size: 40px;">GEM</h2>
+                <p style="color: var(--system-red); font-family: 'Orbitron'; font-size: 16px; margin: 5px 0;">LEVEL 1 | SHADOW MONARCH</p>
+            </div>
+            
+            <div id="ui-bars-placeholder" style="color: rgba(255,255,255,0.3); font-style: italic;">
+                [Emplacement des Stats...]
+            </div>
         </div>
+
     </div>
 </div>
-
 
            
 
